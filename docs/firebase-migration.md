@@ -18,7 +18,7 @@ The challenge catalog stays in `src/content`. Do not copy solutions, hints, anch
 | `recordSubmission` | Transaction: write `users/{uid}/submissions/{id}`, upsert progress, update `users/{uid}/stats`, update `users/{uid}/streak` |
 | `dashboard` | Query submissions for the user, ordered by `submittedAt` |
 
-Stats fields match Prisma: `overallElo`, `debuggingElo`, `securityElo`, `comprehensionElo`, `performanceElo`, `architectureElo`, `mlElo`, `totalChallengesSolved`. Streak fields: `currentStreak`, `longestStreak`, `lastActiveDate`, `streakFreezesLeft`.
+Stats fields match Prisma: `overallElo`, `debuggingElo`, `securityElo`, `comprehensionElo`, `performanceElo`, `architectureElo`, `mlElo`, `totalChallengesSolved`. Streak fields: `currentStreak`, `longestStreak`, `lastActiveDate`, `lastFreezeUsedOn`, `streakFreezesLeft`.
 
 Use the same `decideOutcome` rules. Do not re-derive mastery in the client.
 

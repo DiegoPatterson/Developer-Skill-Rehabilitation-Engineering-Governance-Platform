@@ -1,7 +1,17 @@
+import { formatElo } from "@/engine/elo";
 import { getViewer } from "@/server/auth";
 import { createStore } from "@/server/store";
 import Link from "next/link";
 import { redirect } from "next/navigation";
+
+const CATEGORY_LABELS: Record<string, string> = {
+  debugging: "Debugging",
+  security: "Security",
+  comprehension: "Comprehension",
+  performance: "Performance",
+  architecture: "Architecture",
+  ml: "ML",
+};
 
 export const metadata = { title: "Dashboard · Skill Governance" };
 
@@ -44,11 +54,14 @@ export default async function DashboardPage() {
       <section className="grid gap-3">
         {data.elos.map((row) => (
           <div key={row.category} className="grid grid-cols-[140px_1fr_48px] items-center gap-3 text-sm">
-            <span className="capitalize text-zinc-400">{row.category}</span>
+            <span className="text-zinc-400">{CATEGORY_LABELS[row.category] ?? row.category}</span>
             <div className="h-2 rounded bg-zinc-800">
-              <div className="h-full rounded bg-[#10B981]" style={{ width: `${Math.min(100, (row.elo / 2000) * 100)}%` }} />
+              <div
+                className="h-full rounded bg-[#10B981]"
+                style={{ width: row.rated ? `${Math.min(100, (row.elo / 2000) * 100)}%` : "0%" }}
+              />
             </div>
-            <span className="font-mono text-zinc-300">{row.elo}</span>
+            <span className="font-mono text-zinc-300">{formatElo(row.elo, row.rated)}</span>
           </div>
         ))}
       </section>

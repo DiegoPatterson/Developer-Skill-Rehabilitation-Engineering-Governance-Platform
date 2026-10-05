@@ -20,7 +20,7 @@ The dev server seeds skill nodes from `src/content` the first time it talks to t
 
 ## What you practice
 
-Six categories: debugging, security, comprehension, performance, architecture, and model selection. The skill graph unlocks a node when every prerequisite is mastered. The outage is a 15-minute incident. It is not drawn on the graph. Refreshing the page does not reset its deadline. "Start a new incident" closes the open attempt and starts another clock.
+Six categories: debugging, security, comprehension, performance, architecture, and model selection. The tree view shows one category at a time. Each track starts on its own. A lesson unlocks only after every lesson that feeds it is mastered, including a lesson fed by two tracks. The outage is a 15-minute incident. It is not drawn on a tree. Refreshing the page does not reset its deadline. "Start a new incident" closes the open attempt and starts another clock.
 
 ## Scoring
 
@@ -30,7 +30,7 @@ A late incident submit is capped at 60 and cannot master the node. It is still r
 
 Other kinds master on their own bar: trace and multiple choice when every answer matches, review at an F1 of 0.75, a spec at 80, leakage when the flagged set is exact, governance when every tool and gate matches, and the cost tradeoff only when the chosen option meets latency, budget, and accuracy.
 
-ELO uses K=24 until that node is mastered and K=0 after. The opponent rating is `1000 + difficulty * 160`. An incident updates both debugging and security. Overall ELO is the mean of the six categories. Any submit counts as practice for the streak. Missed days spend shields. You can hold three. Every 7th day in a row earns one, up to that cap. A new account starts with two.
+ELO uses K=24 until that node is mastered and K=0 after. The opponent rating is `1000 + difficulty * 160`. An incident updates both debugging and security. Overall ELO is the mean of the six categories. Any submit counts as practice for the streak. Missed days spend shields. You can hold three. A new account starts with two. Every 7th day in a row earns one, up to that cap. A spent shield also returns on a later submit once 7 days have passed since the last shield was used. If missed days break the streak, shields refill to three.
 
 Run checks the work and writes nothing. Submit writes the score, ELO, streak, and mastery. Debriefs and answer notes are returned only on submit.
 

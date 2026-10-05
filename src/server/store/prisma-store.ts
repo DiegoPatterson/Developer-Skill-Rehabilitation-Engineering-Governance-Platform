@@ -210,6 +210,7 @@ export class PrismaProgressStore implements ProgressStore {
           currentStreak: streakRow?.currentStreak ?? 0,
           longestStreak: streakRow?.longestStreak ?? 0,
           lastActiveDate: streakRow?.lastActiveDate ? ymdFromDate(streakRow.lastActiveDate) : null,
+          lastFreezeUsedOn: streakRow?.lastFreezeUsedOn ? ymdFromDate(streakRow.lastFreezeUsedOn) : null,
           streakFreezesLeft: streakRow?.streakFreezesLeft ?? 2,
         },
         today,
@@ -220,6 +221,7 @@ export class PrismaProgressStore implements ProgressStore {
           currentStreak: streak.currentStreak,
           longestStreak: streak.longestStreak,
           lastActiveDate: dateFromYmd(streak.lastActiveDate ?? today),
+          lastFreezeUsedOn: streak.lastFreezeUsedOn ? dateFromYmd(streak.lastFreezeUsedOn) : null,
           streakFreezesLeft: streak.streakFreezesLeft,
         },
       });
@@ -259,6 +261,17 @@ export class PrismaProgressStore implements ProgressStore {
         select: { submittedAt: true },
       }),
     ]);
+    const played = await db.challengeSubmission.findMany({
+      where: { userId },
+      distinct: ["nodeId"],
+      select: { nodeId: true },
+    });
+    const rated = new Set<Category>();
+    for (const row of played) {
+      const challenge = createSource().get(row.nodeId);
+      if (!challenge) continue;
+      for (const category of ratedCategories(challenge.kind, challenge.category)) rated.add(category);
+    }
     const precisions = recentRows.map((row) => readPrecision(row.breakdown)).filter((value): value is number => value != null);
     const elos = [
       ["debugging", stats?.debuggingElo ?? 1200],
@@ -270,7 +283,7 @@ export class PrismaProgressStore implements ProgressStore {
     ] as const;
     return {
       heatmap: buildHeatmap(heatRows.map((row) => localToday(row.submittedAt))),
-      elos: elos.map(([category, elo]) => ({ category, elo })),
+      elos: elos.map(([category, elo]) => ({ category, elo, rated: rated.has(category) })),
       medianTimeToFixMs: median(passes.map((row) => row.timeToFixMs ?? 0)),
       meanReviewPrecision: precisions.length ? precisions.reduce((sum, value) => sum + value, 0) / precisions.length : null,
       recent: recentRows.slice(0, 8).map((row) => ({

@@ -3,6 +3,7 @@ import type { Challenge, PublicChallenge } from "./types";
 export function toPublic(challenge: Challenge): PublicChallenge {
   return {
     id: challenge.id,
+    number: challenge.number,
     title: challenge.title,
     category: challenge.category,
     difficulty: challenge.difficulty,

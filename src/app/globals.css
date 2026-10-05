@@ -57,6 +57,10 @@ body {
   font: inherit;
 }
 
+select.field {
+  width: auto;
+}
+
 .workspace {
   display: grid;
   grid-template-columns: minmax(240px, 320px) minmax(0, 1fr) minmax(240px, 360px);
@@ -103,8 +107,19 @@ body {
   display: none;
 }
 
-.skill-graph {
+.skill-board {
+  display: flex;
+  width: 100%;
   height: calc(100vh - 56px);
+  min-height: 0;
+  flex-direction: column;
+  background: #09090b;
+}
+
+.skill-graph {
+  width: 100%;
+  min-height: 0;
+  flex: 1;
   background: #09090b;
 }
 

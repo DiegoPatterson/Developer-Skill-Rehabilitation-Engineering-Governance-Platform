@@ -39,7 +39,7 @@ export type DashboardRecent = {
 
 export type DashboardData = {
   heatmap: { date: string; count: number }[];
-  elos: { category: string; elo: number }[];
+  elos: { category: string; elo: number; rated: boolean }[];
   medianTimeToFixMs: number | null;
   meanReviewPrecision: number | null;
   recent: DashboardRecent[];

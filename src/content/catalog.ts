@@ -17,9 +17,15 @@ export function graphChallenges(): Challenge[] {
 
 export function assertCatalog(): void {
   const ids = new Set<string>();
+  const numbers = new Set<number>();
   for (const challenge of challenges) {
     if (ids.has(challenge.id)) throw new Error(`Duplicate challenge ${challenge.id}`);
     ids.add(challenge.id);
+    if (!Number.isInteger(challenge.number) || challenge.number < 1) {
+      throw new Error(`${challenge.id} needs a positive lesson number`);
+    }
+    if (numbers.has(challenge.number)) throw new Error(`Duplicate lesson number ${challenge.number}`);
+    numbers.add(challenge.number);
   }
   for (const challenge of challenges) {
     for (const prereq of challenge.prereqs) {

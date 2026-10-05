@@ -2,6 +2,7 @@
 
 import { assessOption, monthlyCost } from "@/engine/cost";
 import type { SpecInput } from "@/engine/spec";
+import { formatLessonNumber } from "@/content/lesson";
 import type { GradeResponse } from "@/content/payload";
 import type { AttemptView, WorkspaceView } from "@/content/view-model";
 import Link from "next/link";
@@ -40,14 +41,16 @@ async function postJson<T>(url: string, body: unknown): Promise<T> {
 function Locked({ view }: { view: WorkspaceView }) {
   return (
     <section className="mx-auto max-w-xl px-6 py-16">
-      <p className="font-mono text-xs uppercase tracking-wide text-zinc-500">{view.category}</p>
+      <p className="font-mono text-xs uppercase tracking-wide text-zinc-500">
+        {formatLessonNumber(view.number)} · {view.category}
+      </p>
       <h1 className="mt-2 text-2xl font-semibold text-zinc-50">{view.title}</h1>
       <p className="mt-3 text-sm text-zinc-400">This node stays locked until you master:</p>
       <ul className="mt-3 space-y-2">
         {view.missing.map((item) => (
           <li key={item.id}>
             <Link href={`/challenge/${item.id}`} className="text-[#4ADE80]">
-              {item.title}
+              {formatLessonNumber(item.number)} {item.title}
             </Link>
           </li>
         ))}
@@ -228,7 +231,7 @@ function LiveWorkspace({ view, attempt }: { view: WorkspaceView; attempt: Attemp
       </div>
       <section className={paneClass("problem", "workspace__problem bg-[#121215] p-4")}>
         <p className="font-mono text-[10px] uppercase tracking-wide text-zinc-500">
-          {view.category} · difficulty {view.difficulty}
+          {formatLessonNumber(view.number)} · {view.category} · difficulty {view.difficulty}
         </p>
         <h1 className="mt-1 text-lg font-semibold text-zinc-50">{view.title}</h1>
         <p className="mt-2 font-mono text-xs text-[#4ADE80]">{view.signature}</p>

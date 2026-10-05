@@ -30,6 +30,7 @@ export type Viewer = {
   currentStreak: number;
   longestStreak: number;
   shields: number;
+  rated: boolean;
 };
 
 export function hashToken(token: string): string {
@@ -54,7 +55,7 @@ export async function getViewer(): Promise<Viewer | null> {
   const db = getDb();
   const session = await db.session.findUnique({
     where: { tokenHash: hashToken(token) },
-    include: { user: { include: { stats: true, streak: true } } },
+    include: { user: { include: { stats: true, streak: true, _count: { select: { submissions: true } } } } },
   });
   if (!session) return null;
   if (session.expiresAt.getTime() <= Date.now()) {
@@ -79,6 +80,7 @@ export async function getViewer(): Promise<Viewer | null> {
     currentStreak: user.streak?.currentStreak ?? 0,
     longestStreak: user.streak?.longestStreak ?? 0,
     shields: user.streak?.streakFreezesLeft ?? 0,
+    rated: user._count.submissions > 0,
   };
 }
 

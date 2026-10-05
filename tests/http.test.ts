@@ -50,7 +50,7 @@ run("http", () => {
     const cookie = logged.headers.getSetCookie().map((item) => item.split(";")[0]).join("; ");
     expect(cookie).toContain("sg_session=");
 
-    const lockedPage = await fetch(`${base}/challenge/dbg-boundaries`, { headers: { cookie } });
+    const lockedPage = await fetch(`${base}/challenge/dbg-async-races`, { headers: { cookie } });
     expect(lockedPage.status).toBe(200);
     const lockedHtml = await lockedPage.text();
     expect(lockedHtml).toContain("stays locked");
@@ -59,7 +59,7 @@ run("http", () => {
     const lockedGrade = await fetch(`${base}/api/grade`, {
       method: "POST",
       headers: { "content-type": "application/json", cookie },
-      body: JSON.stringify({ nodeId: "dbg-boundaries", mode: "run", files: filesOf("dbg-boundaries", "solution") }),
+      body: JSON.stringify({ nodeId: "dbg-async-races", mode: "run", files: filesOf("dbg-async-races", "solution") }),
     });
     expect(lockedGrade.status).toBe(403);
 

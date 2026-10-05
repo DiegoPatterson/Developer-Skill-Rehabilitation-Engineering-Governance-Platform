@@ -13,6 +13,7 @@ export default async function AppLayout({ children }: { children: ReactNode }) {
       <SiteHeader
         username={viewer.username}
         overallElo={viewer.overallElo}
+        rated={viewer.rated}
         streak={viewer.currentStreak}
         shields={viewer.shields}
         skills={skillLinks(createSource().list())}

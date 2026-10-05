@@ -5,6 +5,7 @@ export type GraphStatus = "locked" | "in_progress" | "mastered";
 
 export type GraphNodeView = {
   id: string;
+  number: number;
   title: string;
   category: string;
   summary: string;
@@ -13,6 +14,8 @@ export type GraphNodeView = {
   y: number;
   prereqs: string[];
   status: GraphStatus;
+  inGraph: boolean;
+  href: string;
 };
 
 export type CfgView = {
@@ -22,7 +25,7 @@ export type CfgView = {
 
 export type WorkspaceView = PublicChallenge & {
   locked: boolean;
-  missing: { id: string; title: string }[];
+  missing: { id: string; title: string; number: number }[];
   scenario: CostScenario | null;
   options: CostOption[];
   cfg: CfgView | null;
@@ -37,4 +40,4 @@ export type AttemptView = {
   hints: string[];
 };
 
-export type SkillLink = { id: string; title: string };
+export type SkillLink = { id: string; title: string; number: number };

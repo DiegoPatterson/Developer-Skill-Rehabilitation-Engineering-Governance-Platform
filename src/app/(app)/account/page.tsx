@@ -1,4 +1,5 @@
 import { LogoutButton } from "@/components/auth-form";
+import { formatElo } from "@/engine/elo";
 import { getViewer } from "@/server/auth";
 import { redirect } from "next/navigation";
 
@@ -11,7 +12,7 @@ export default async function AccountPage() {
     ["Username", viewer.username],
     ["Email", viewer.email],
     ["Joined", new Date(viewer.createdAt).toLocaleDateString()],
-    ["Overall ELO", String(viewer.overallElo)],
+    ["Overall ELO", formatElo(viewer.overallElo, viewer.rated)],
     ["Streak", String(viewer.currentStreak)],
     ["Longest streak", String(viewer.longestStreak)],
     ["Shields", String(viewer.shields)],

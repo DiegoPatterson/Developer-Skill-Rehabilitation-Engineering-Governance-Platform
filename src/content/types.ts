@@ -67,6 +67,8 @@ export type PolicyGate = { id: string; description: string; answer: boolean };
 
 export type Challenge = {
   id: string;
+  /** Stable catalog number. New lessons take the next integer. Do not renumber. */
+  number: number;
   title: string;
   category: Category;
   difficulty: number;
@@ -102,6 +104,7 @@ export type Challenge = {
 
 export type PublicChallenge = {
   id: string;
+  number: number;
   title: string;
   category: Category;
   difficulty: number;

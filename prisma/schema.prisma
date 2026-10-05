@@ -69,6 +69,7 @@ model UserStreak {
   currentStreak     Int       @default(0) @map("current_streak")
   longestStreak     Int       @default(0) @map("longest_streak")
   lastActiveDate    DateTime? @map("last_active_date") @db.Date
+  lastFreezeUsedOn  DateTime? @map("last_freeze_used_on") @db.Date
   streakFreezesLeft Int       @default(2) @map("streak_freezes_left")
   user              User      @relation(fields: [userId], references: [id], onDelete: Cascade)
 

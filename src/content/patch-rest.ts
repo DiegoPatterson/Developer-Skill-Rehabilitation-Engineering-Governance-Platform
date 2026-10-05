@@ -10,6 +10,7 @@ const invoices = [
 export const patchRest: Challenge[] = [
   {
     id: "sec-access",
+    number: 9,
     title: "Invoice authorization",
     category: "security",
     difficulty: 3,
@@ -76,6 +77,7 @@ export const patchRest: Challenge[] = [
   },
   {
     id: "sec-llm",
+    number: 13,
     title: "Supply chain and prompt gates",
     category: "security",
     difficulty: 4,
@@ -224,6 +226,7 @@ function guardUntrusted(input) {
   },
   {
     id: "perf-scale",
+    number: 10,
     title: "Duplicate emails at scale",
     category: "performance",
     difficulty: 3,
@@ -309,6 +312,7 @@ function guardUntrusted(input) {
   },
   {
     id: "perf-data",
+    number: 14,
     title: "Query shape and the event loop",
     category: "performance",
     difficulty: 4,
@@ -407,6 +411,7 @@ async function foldEvents(events, yieldTick) {
   },
   {
     id: "incident-ledger",
+    number: 20,
     title: "Payments ledger incident",
     category: "debugging",
     difficulty: 5,

@@ -16,6 +16,9 @@ function stripSnaps(source: string): string {
 describe("catalog", () => {
   it("is a prerequisite DAG with a public view that hides reference solutions", () => {
     assertCatalog();
+    const numbers = challenges.map((challenge) => challenge.number).sort((a, b) => a - b);
+    expect(new Set(numbers).size).toBe(challenges.length);
+    expect(numbers[0]).toBe(1);
     for (const challenge of challenges) {
       const pub = JSON.stringify(toPublic(challenge));
       expect(pub).not.toContain("REFERENCE_SOLUTION");

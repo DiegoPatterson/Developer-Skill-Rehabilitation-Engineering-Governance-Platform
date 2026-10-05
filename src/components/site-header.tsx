@@ -1,18 +1,22 @@
 "use client";
 
+import { formatLessonNumber } from "@/content/lesson";
 import type { SkillLink } from "@/content/view-model";
+import { formatElo } from "@/engine/elo";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 
 export function SiteHeader({
   username,
   overallElo,
+  rated,
   streak,
   shields,
   skills,
 }: {
   username: string;
   overallElo: number;
+  rated: boolean;
   streak: number;
   shields: number;
   skills: SkillLink[];
@@ -25,9 +29,9 @@ export function SiteHeader({
     : pathname.startsWith("/account")
       ? "Account"
       : pathname.startsWith("/outage")
-        ? "Outage"
+        ? `${formatLessonNumber(skills.find((item) => item.id === "incident-ledger")?.number ?? 20)} Outage`
         : pathname.startsWith("/challenge/")
-          ? (skill?.title ?? "Challenge")
+          ? (skill ? `${formatLessonNumber(skill.number)} ${skill.title}` : "Challenge")
           : "Graph";
 
   const link = (href: string, label: string) => {
@@ -56,7 +60,7 @@ export function SiteHeader({
         {section !== "Graph" ? <span> / {section}</span> : null}
       </p>
       <p className="ml-auto font-mono text-xs text-zinc-400">
-        Streak {streak} · Shields {shields} · ELO {overallElo}
+        Streak {streak} · Shields {shields} · ELO {formatElo(overallElo, rated)}
       </p>
       <Link href="/account" className="max-w-[10rem] truncate text-sm text-zinc-200 underline decoration-[#27272A]">
         {username}

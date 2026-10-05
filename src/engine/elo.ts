@@ -12,6 +12,10 @@ export function nextElo(player: number, opponent: number, score: number, k = 24)
   return Math.round(Math.max(100, next));
 }
 
+export function formatElo(elo: number, rated: boolean): string {
+  return rated ? String(elo) : "—";
+}
+
 export function overallElo(categories: number[]): number {
   if (categories.length === 0) return 1200;
   const total = categories.reduce((sum, value) => sum + value, 0);

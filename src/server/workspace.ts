@@ -19,7 +19,7 @@ export async function loadWorkspace(userId: string, nodeId: string): Promise<{ v
   const list = source.list();
   const store = createStore();
   const mastered = await store.masteredIds(userId);
-  const titles = new Map(list.map((item) => [item.id, item.title]));
+  const titles = new Map(list.map((item) => [item.id, { title: item.title, number: item.number }]));
   const view = toWorkspace(challenge, mastered, titles);
   const attempt = view.locked ? null : await store.openAttempt(userId, nodeId);
   return { view, attempt };
