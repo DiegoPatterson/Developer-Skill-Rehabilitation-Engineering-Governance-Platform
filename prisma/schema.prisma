@@ -1,0 +1,143 @@
+generator client {
+  provider = "prisma-client"
+  output   = "../src/generated/prisma"
+}
+
+datasource db {
+  provider = "postgresql"
+}
+
+model User {
+  id              String    @id @default(uuid()) @db.Uuid
+  username        String    @unique @db.VarChar(50)
+  email           String    @unique
+  passwordHash    String    @map("password_hash")
+  emailVerifiedAt DateTime? @map("email_verified_at") @db.Timestamptz(6)
+  createdAt       DateTime  @default(now()) @map("created_at") @db.Timestamptz(6)
+
+  stats         UserStats?
+  streak        UserStreak?
+  progress      UserNodeProgress[]
+  submissions   ChallengeSubmission[]
+  sessions      Session[]
+  attempts      ChallengeAttempt[]
+  verifications EmailVerification[]
+
+  @@map("users")
+}
+
+model EmailVerification {
+  id        String    @id @default(uuid()) @db.Uuid
+  userId    String    @map("user_id") @db.Uuid
+  tokenHash String    @unique @map("token_hash")
+  expiresAt DateTime  @map("expires_at") @db.Timestamptz(6)
+  usedAt    DateTime? @map("used_at") @db.Timestamptz(6)
+  createdAt DateTime  @default(now()) @map("created_at") @db.Timestamptz(6)
+  user      User      @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([userId])
+  @@map("email_verifications")
+}
+
+model Session {
+  tokenHash String   @id @map("token_hash")
+  userId    String   @map("user_id") @db.Uuid
+  expiresAt DateTime @map("expires_at") @db.Timestamptz(6)
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([userId])
+  @@map("sessions")
+}
+
+model UserStats {
+  userId                String @id @map("user_id") @db.Uuid
+  overallElo            Int    @default(1200) @map("overall_elo")
+  debuggingElo          Int    @default(1200) @map("debugging_elo")
+  securityElo           Int    @default(1200) @map("security_elo")
+  comprehensionElo      Int    @default(1200) @map("comprehension_elo")
+  performanceElo        Int    @default(1200) @map("performance_elo")
+  architectureElo       Int    @default(1200) @map("architecture_elo")
+  mlElo                 Int    @default(1200) @map("ml_elo")
+  totalChallengesSolved Int    @default(0) @map("total_challenges_solved")
+  user                  User   @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@map("user_stats")
+}
+
+model UserStreak {
+  userId            String    @id @map("user_id") @db.Uuid
+  currentStreak     Int       @default(0) @map("current_streak")
+  longestStreak     Int       @default(0) @map("longest_streak")
+  lastActiveDate    DateTime? @map("last_active_date") @db.Date
+  streakFreezesLeft Int       @default(2) @map("streak_freezes_left")
+  user              User      @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@map("user_streaks")
+}
+
+model SkillNode {
+  id                  String   @id @db.VarChar(100)
+  title               String
+  category            String   @db.VarChar(50)
+  prerequisiteNodeIds String[] @map("prerequisite_node_ids")
+  difficultyLevel     Int      @default(1) @map("difficulty_level")
+  summary             String
+  showInGraph         Boolean  @default(true) @map("show_in_graph")
+
+  progress    UserNodeProgress[]
+  submissions ChallengeSubmission[]
+
+  @@map("skill_nodes")
+}
+
+model UserNodeProgress {
+  userId      String    @map("user_id") @db.Uuid
+  nodeId      String    @map("node_id") @db.VarChar(100)
+  status      String    @default("in_progress") @db.VarChar(20)
+  completedAt DateTime? @map("completed_at") @db.Timestamptz(6)
+  bestScore   Int       @default(0) @map("best_score")
+  attempts    Int       @default(0)
+
+  user User      @relation(fields: [userId], references: [id], onDelete: Cascade)
+  node SkillNode @relation(fields: [nodeId], references: [id], onDelete: Cascade)
+
+  @@id([userId, nodeId])
+  @@map("user_node_progress")
+}
+
+model ChallengeSubmission {
+  id                String   @id @default(uuid()) @db.Uuid
+  userId            String   @map("user_id") @db.Uuid
+  nodeId            String   @map("node_id") @db.VarChar(100)
+  codeSubmitted     String   @map("code_submitted") @db.Text
+  passedAllTests    Boolean  @map("passed_all_tests")
+  executionTimeMs   Int?     @map("execution_time_ms")
+  optimalPatchScore Int?     @map("optimal_patch_score")
+  timeToFixMs       Int?     @map("time_to_fix_ms")
+  category          String   @db.VarChar(50)
+  hintsUsed         Int      @default(0) @map("hints_used")
+  breakdown         Json?
+  submittedAt       DateTime @default(now()) @map("submitted_at") @db.Timestamptz(6)
+
+  user User      @relation(fields: [userId], references: [id], onDelete: Cascade)
+  node SkillNode @relation(fields: [nodeId], references: [id])
+
+  @@index([userId, submittedAt])
+  @@map("challenge_submissions")
+}
+
+model ChallengeAttempt {
+  id         String    @id @default(uuid()) @db.Uuid
+  userId     String    @map("user_id") @db.Uuid
+  nodeId     String    @map("node_id") @db.VarChar(100)
+  mode       String    @db.VarChar(20)
+  startedAt  DateTime  @default(now()) @map("started_at") @db.Timestamptz(6)
+  deadlineAt DateTime? @map("deadline_at") @db.Timestamptz(6)
+  hintsUsed  Int       @default(0) @map("hints_used")
+  closedAt   DateTime? @map("closed_at") @db.Timestamptz(6)
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([userId, nodeId])
+  @@map("challenge_attempts")
+}

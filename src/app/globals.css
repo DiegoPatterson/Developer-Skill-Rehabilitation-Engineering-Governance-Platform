@@ -1,0 +1,155 @@
+@import "tailwindcss";
+
+@theme inline {
+  --color-background: #09090b;
+  --color-foreground: #e4e4e7;
+  --font-sans: var(--font-inter), "Inter", sans-serif;
+  --font-mono: var(--font-jetbrains), "JetBrains Mono", ui-monospace, monospace;
+}
+
+html,
+body {
+  height: 100%;
+  background: #09090b;
+  color: #e4e4e7;
+}
+
+body {
+  font-family: var(--font-sans);
+  margin: 0;
+}
+
+:focus-visible {
+  outline: 2px solid #10b981;
+  outline-offset: 2px;
+}
+
+.btn {
+  height: 36px;
+  padding: 0 14px;
+  border-radius: 6px;
+  border: 1px solid #27272a;
+  background: #18181b;
+  color: #e4e4e7;
+  font-size: 14px;
+  cursor: pointer;
+}
+
+.btn:disabled {
+  opacity: 0.45;
+  cursor: not-allowed;
+}
+
+.btn-primary {
+  background: #10b981;
+  border-color: #10b981;
+  color: #052e16;
+  font-weight: 650;
+}
+
+.field {
+  width: 100%;
+  background: #09090b;
+  border: 1px solid #27272a;
+  color: #e4e4e7;
+  border-radius: 6px;
+  padding: 8px 10px;
+  font: inherit;
+}
+
+.workspace {
+  display: grid;
+  grid-template-columns: minmax(240px, 320px) minmax(0, 1fr) minmax(240px, 360px);
+  grid-template-rows: minmax(0, 1fr) auto;
+  height: calc(100vh - 56px);
+  min-height: 0;
+}
+
+.workspace__problem,
+.workspace__work,
+.workspace__results {
+  min-height: 0;
+  overflow: auto;
+  border-color: #27272a;
+}
+
+.workspace__problem {
+  grid-column: 1;
+  grid-row: 1;
+  border-right: 1px solid #27272a;
+}
+
+.workspace__work {
+  grid-column: 2;
+  grid-row: 1;
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+}
+
+.workspace__results {
+  grid-column: 3;
+  grid-row: 1;
+  border-left: 1px solid #27272a;
+}
+
+.workspace__footer {
+  grid-column: 1 / -1;
+  grid-row: 2;
+  border-top: 1px solid #27272a;
+}
+
+.workspace__tabs {
+  display: none;
+}
+
+.skill-graph {
+  height: calc(100vh - 56px);
+  background: #09090b;
+}
+
+.skill-graph .react-flow__node {
+  cursor: pointer;
+}
+
+.react-flow {
+  --xy-background-color: #09090b;
+  --xy-node-border-radius: 8px;
+}
+
+@media (max-width: 960px) {
+  .workspace {
+    grid-template-columns: 1fr;
+    grid-template-rows: auto minmax(0, 1fr) auto;
+    height: calc(100vh - 56px);
+  }
+
+  .workspace__tabs {
+    display: flex;
+    grid-column: 1;
+    grid-row: 1;
+    gap: 6px;
+    padding: 8px;
+    border-bottom: 1px solid #27272a;
+  }
+
+  .workspace__problem,
+  .workspace__work,
+  .workspace__results {
+    grid-column: 1;
+    grid-row: 2;
+    display: none;
+    border: 0;
+  }
+
+  .workspace__problem.is-active,
+  .workspace__work.is-active,
+  .workspace__results.is-active {
+    display: flex;
+    flex-direction: column;
+  }
+
+  .workspace__footer {
+    grid-row: 3;
+  }
+}
