@@ -6,6 +6,6 @@ export const metadata = { title: "Register · Skill Governance" };
 
 export default async function RegisterPage() {
   const viewer = await getViewer();
-  if (viewer) redirect("/graph");
+  if (viewer) redirect("/lessons");
   return <AuthForm mode="register" />;
 }

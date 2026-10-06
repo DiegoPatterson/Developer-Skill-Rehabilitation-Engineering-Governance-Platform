@@ -1,6 +1,6 @@
 import { NextResponse, type NextRequest } from "next/server";
 
-const protectedPath = /^\/(graph|dashboard|account|outage|challenge|propose|review)(\/|$)/;
+const protectedPath = /^\/(lessons|learn|graph|dashboard|account|outage|challenge|propose|review)(\/|$)/;
 
 export default function proxy(request: NextRequest) {
   const hasSession = Boolean(request.cookies.get("sg_session")?.value);
@@ -15,6 +15,10 @@ export default function proxy(request: NextRequest) {
 
 export const config = {
   matcher: [
+    "/lessons",
+    "/lessons/:path*",
+    "/learn",
+    "/learn/:path*",
     "/graph",
     "/graph/:path*",
     "/dashboard",

@@ -35,10 +35,6 @@ export function ProposalPreview({ draft }: { draft: ProposalDraft }) {
           <dd>{draft.difficulty}</dd>
         </div>
         <div>
-          <dt className="text-xs text-zinc-500">On the tree</dt>
-          <dd>{draft.showInGraph ? "Yes" : "List only"}</dd>
-        </div>
-        <div>
           <dt className="text-xs text-zinc-500">Prerequisites</dt>
           <dd>{draft.prereqNumbers.length ? draft.prereqNumbers.map((number) => `#${number}`).join(", ") : "None"}</dd>
         </div>

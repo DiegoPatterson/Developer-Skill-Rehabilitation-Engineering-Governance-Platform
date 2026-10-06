@@ -141,9 +141,9 @@ run("http", () => {
     expect(outage.status).toBe(200);
     expect(await outage.text()).toContain("Payments ledger incident");
 
-    const graph = await fetch(`${base}/graph`, { headers: { cookie } });
-    expect(graph.status).toBe(200);
-    expect(await graph.text()).toContain("Alias and ledger transfers");
+    const lessons = await fetch(`${base}/lessons`, { headers: { cookie } });
+    expect(lessons.status).toBe(200);
+    expect(await lessons.text()).toContain("Alias and ledger transfers");
 
     const anonymous = await fetch(`${base}/api/grade`, {
       method: "POST",
@@ -154,7 +154,7 @@ run("http", () => {
 
     const loggedOut = await fetch(`${base}/api/auth/logout`, { method: "POST", headers: { cookie } });
     expect(loggedOut.status).toBe(200);
-    const after = await fetch(`${base}/graph`, { redirect: "manual" });
+    const after = await fetch(`${base}/lessons`, { redirect: "manual" });
     expect(after.status).toBe(307);
     expect(after.headers.get("location")).toContain("/login");
   }, 60000);

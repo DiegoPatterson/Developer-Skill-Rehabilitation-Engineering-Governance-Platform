@@ -11,7 +11,7 @@ export const metadata = { title: "Review problem · Skill Governance" };
 export default async function ReviewDetailPage({ params }: { params: Promise<{ id: string }> }) {
   const viewer = await getViewer();
   if (!viewer) redirect("/login");
-  if (!canReview(viewer.role)) redirect("/graph");
+  if (!canReview(viewer.role)) redirect("/lessons");
   const { id } = await params;
   const loaded = await getReviewProposal(id);
   if (!loaded) notFound();

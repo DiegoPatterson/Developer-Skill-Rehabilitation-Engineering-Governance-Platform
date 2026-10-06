@@ -36,12 +36,14 @@ export function SiteHeader({
           ? "Propose"
           : pathname.startsWith("/review")
             ? "Review"
-            : pathname.startsWith("/challenge/")
-              ? (skill ? `${formatLessonNumber(skill.number)} ${skill.title}` : "Challenge")
-              : "Graph";
+            : pathname.startsWith("/learn")
+              ? "Learning"
+              : pathname.startsWith("/challenge/")
+                ? (skill ? `${formatLessonNumber(skill.number)} ${skill.title}` : "Challenge")
+                : "Lessons";
 
   const link = (href: string, label: string) => {
-    const active = href === "/graph" ? pathname === "/graph" : pathname.startsWith(href);
+    const active = pathname === href || pathname.startsWith(`${href}/`);
     return (
       <Link href={href} className={active ? "text-[#4ADE80]" : "text-zinc-400 hover:text-zinc-200"}>
         {label}
@@ -51,21 +53,22 @@ export function SiteHeader({
 
   return (
     <header className="flex h-14 items-center gap-4 border-b border-[#27272A] bg-[#09090B] px-4">
-      <Link href="/graph" className="font-semibold text-zinc-50">
+      <Link href="/lessons" className="font-semibold text-zinc-50">
         Skill Governance
       </Link>
       <nav className="flex min-w-0 gap-4 overflow-x-auto text-sm">
-        {link("/graph", "Graph")}
+        {link("/lessons", "Lessons")}
+        {link("/learn", "Learning")}
         {link("/dashboard", "Dashboard")}
         {link("/outage", "Outage")}
         {link("/propose", "Propose")}
         {staff ? link("/review", "Review") : null}
       </nav>
       <p className="hidden min-w-0 flex-1 truncate text-sm text-zinc-500 md:block">
-        <Link href="/graph" className="hover:text-zinc-300">
-          Graph
+        <Link href="/lessons" className="hover:text-zinc-300">
+          Lessons
         </Link>
-        {section !== "Graph" ? <span> / {section}</span> : null}
+        {section !== "Lessons" ? <span> / {section}</span> : null}
       </p>
       <p className="ml-auto font-mono text-xs text-zinc-400">
         Streak {streak} · Shields {shields} · ELO {formatElo(overallElo, rated)}

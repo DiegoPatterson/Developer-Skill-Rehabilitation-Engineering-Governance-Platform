@@ -20,7 +20,6 @@ type FormState = {
   category: ProposalDraft["category"];
   kind: ProposalKind;
   difficulty: number;
-  showInGraph: boolean;
   prereqText: string;
   signature: string;
   constraintsText: string;
@@ -53,7 +52,6 @@ function blank(): FormState {
     category: "debugging",
     kind: "patch",
     difficulty: 1,
-    showInGraph: true,
     prereqText: "",
     signature: "",
     constraintsText: "",
@@ -192,7 +190,7 @@ export function ProposalForm({ initial, proposalId }: { initial?: ProposalDraft;
       category: form.category,
       kind: form.kind,
       difficulty: form.difficulty,
-      showInGraph: form.showInGraph,
+      showInGraph: false,
       prereqNumbers: numbers,
       signature: form.signature,
       constraints: lines(form.constraintsText),
@@ -271,10 +269,6 @@ export function ProposalForm({ initial, proposalId }: { initial?: ProposalDraft;
           />
         </Field>
       </div>
-      <label className="flex items-center gap-2 text-sm text-zinc-300">
-        <input type="checkbox" checked={form.showInGraph} onChange={(event) => set({ showInGraph: event.target.checked })} />
-        Show this lesson on its skill tree
-      </label>
       <Field label="Signature">
         <input className="field font-mono text-sm" value={form.signature} maxLength={200} onChange={(event) => set({ signature: event.target.value })} />
       </Field>

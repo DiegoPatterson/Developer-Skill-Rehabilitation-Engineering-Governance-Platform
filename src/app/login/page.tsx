@@ -5,8 +5,8 @@ import { redirect } from "next/navigation";
 export const metadata = { title: "Sign in · Skill Governance" };
 
 function safeNext(next: string | undefined): string {
-  if (!next || !next.startsWith("/") || next.startsWith("//") || next.startsWith("/\\")) return "/graph";
-  if (next === "/login" || next.startsWith("/login?") || next === "/register" || next.startsWith("/register?")) return "/graph";
+  if (!next || !next.startsWith("/") || next.startsWith("//") || next.startsWith("/\\")) return "/lessons";
+  if (next === "/login" || next.startsWith("/login?") || next === "/register" || next.startsWith("/register?")) return "/lessons";
   return next;
 }
 

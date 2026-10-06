@@ -16,11 +16,11 @@ Confirmation mail is sent from `strayapps.co@gmail.com`. In `.env`, set `SMTP_US
 
 `npm test` runs the engine, catalog, sandbox, and scoring-rule tests.
 
-The dev server copies a lesson from `src/content` into Postgres the first time that lesson has no saved payload. After that, the list and the tree read active rows from `skill_nodes`. Retiring a lesson hides it and leaves the row in place. User accounts, sessions, progress, and submissions stay in Postgres.
+The dev server copies a lesson from `src/content` into Postgres the first time that lesson has no saved payload. After that, Lessons and Learning read active rows from `skill_nodes`. Retiring a lesson hides it and leaves the row in place. User accounts, sessions, progress, and submissions stay in Postgres.
 
 ## What you practice
 
-Six categories: debugging, security, comprehension, performance, architecture, and model selection. The tree view shows one category at a time. Each track starts on its own. A lesson unlocks only after every lesson that feeds it is mastered, including a lesson fed by two tracks. The outage is a 15-minute incident. It is not drawn on a tree.
+Six categories: debugging, security, comprehension, performance, architecture, and model selection. Lessons is the full catalog and the page you land on. Learning is a separate set of fixed paths, lessons 1–19, and does not grow when a new lesson is accepted. A lesson unlocks only after every lesson it requires is mastered, including a lesson fed by two paths. The outage is a 15-minute incident. It is in Lessons and on no path.
 
 Anyone signed in can propose a problem from Propose. It asks for a label, a name, a description, a track, a question type, starter code or the answer key that type needs, and optional prerequisites. An admin or owner accepts or rejects it from Review. Accepting assigns the next lesson number. New accounts are active users. An inactive or banned account cannot sign in. Refreshing the page does not reset its deadline. "Start a new incident" closes the open attempt and starts another clock.
 

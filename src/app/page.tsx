@@ -4,7 +4,7 @@ import { redirect } from "next/navigation";
 
 export default async function Home() {
   const viewer = await getViewer();
-  if (viewer) redirect("/graph");
+  if (viewer) redirect("/lessons");
   return (
     <main className="mx-auto flex min-h-full max-w-3xl flex-col justify-center gap-8 px-6 py-16">
       <p className="font-mono text-xs uppercase tracking-[0.18em] text-[#4ADE80]">Skill Governance</p>

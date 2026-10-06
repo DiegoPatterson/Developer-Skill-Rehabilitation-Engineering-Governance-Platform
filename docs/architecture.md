@@ -4,7 +4,7 @@ Skill Governance is a Next.js app. The catalog is TypeScript in git. User state 
 
 ## Request path
 
-`src/proxy.ts` only looks at the `sg_session` cookie. A missing cookie sends `/graph`, `/dashboard`, `/account`, `/outage`, and `/challenge/*` to `/login`. A present cookie sends `/login` and `/register` to `/graph`. Pages and route handlers load the session from Postgres and reject an expired or unknown token. The cookie is httpOnly, SameSite=Lax, 30 days, and `Secure` only when the request is HTTPS.
+`src/proxy.ts` only looks at the `sg_session` cookie. A missing cookie sends `/lessons`, `/learn`, `/graph`, `/dashboard`, `/account`, `/outage`, `/challenge/*`, `/propose`, and `/review` to `/login`. Pages and route handlers load the session from Postgres and reject an expired or unknown token. The cookie is httpOnly, SameSite=Lax, 30 days, and `Secure` only when the request is HTTPS.
 
 Register and login hash the password with bcrypt (cost 10). The session row stores the SHA-256 of a 32-byte token. The raw token is the cookie value.
 
@@ -24,7 +24,7 @@ Patch and incident code goes through `LocalPermissionSandbox` unless `SANDBOX_DR
 
 Opponent rating is `1000 + difficulty * 160`. K is 24 before the node is mastered and 0 after. An incident updates debugging and security. Overall is the mean of the six category ratings. The streak uses the server's local calendar day. Dates are stored as UTC midnight of that day and read back with UTC getters.
 
-The running catalog is the `skill_nodes` table. A lesson with no saved position is laid out from its prerequisites. An admin placement is stored on the row. Status is mastered, locked, or in progress. Locked means a prerequisite is not mastered. Inactive lessons are hidden. The incident starts off the tree and stays open.
+The running catalog is the `skill_nodes` table. Lessons lists every active row. Learning shows fixed paths for lessons 1–19 and does not place accepted lessons on a path. Status is mastered, locked, or in progress. Locked means a prerequisite is not mastered. Inactive lessons are hidden. The incident stays open and is not on a path.
 
 ## Later providers
 

@@ -42,8 +42,8 @@ export function AuthForm({ mode, verified = false }: { mode: "login" | "register
       setPending(false);
       return;
     }
-    const next = new URLSearchParams(window.location.search).get("next") ?? "/graph";
-    const safeNext = /^\/[A-Za-z0-9/_-]*$/.test(next) ? next : "/graph";
+    const next = new URLSearchParams(window.location.search).get("next") ?? "/lessons";
+    const safeNext = /^\/[A-Za-z0-9/_-]*$/.test(next) ? next : "/lessons";
     try {
       const response = await fetch(mode === "login" ? "/api/auth/login" : "/api/auth/register", {
         method: "POST",

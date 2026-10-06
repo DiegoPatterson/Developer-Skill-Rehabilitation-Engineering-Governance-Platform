@@ -13,7 +13,7 @@ const STATUS = { pending: "Pending", approved: "Accepted", rejected: "Rejected" 
 export default async function ReviewPage() {
   const viewer = await getViewer();
   if (!viewer) redirect("/login");
-  if (!canReview(viewer.role)) redirect("/graph");
+  if (!canReview(viewer.role)) redirect("/lessons");
   const queue = await listReviewQueue();
   const pending = queue.filter((item) => item.status === "pending").length;
   return (
