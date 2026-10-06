@@ -5,12 +5,11 @@ import {
   compareLessons,
   formatLessonNumber,
   formatRequirement,
-  lessonTypeLabel,
   lessonVisible,
   type LessonSort,
 } from "@/content/lesson";
 import { pathForLesson } from "@/content/paths";
-import type { GraphNodeView, GraphStatus, RetiredLesson } from "@/content/view-model";
+import type { GraphNodeView, GraphStatus } from "@/content/view-model";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useMemo, useState } from "react";
@@ -35,15 +34,7 @@ async function patchCatalog(id: string, body: Record<string, unknown>): Promise<
   if (!response.ok) throw new Error(data?.error ?? "Could not update the lesson.");
 }
 
-export function LessonList({
-  nodes,
-  staff = false,
-  retired = [],
-}: {
-  nodes: GraphNodeView[];
-  staff?: boolean;
-  retired?: RetiredLesson[];
-}) {
+export function LessonList({ nodes, staff = false }: { nodes: GraphNodeView[]; staff?: boolean }) {
   const router = useRouter();
   const [query, setQuery] = useState("");
   const [category, setCategory] = useState("");
@@ -72,7 +63,7 @@ export function LessonList({
   }
 
   function retire(node: { id: string; title: string }) {
-    if (!window.confirm(`Retire "${node.title}"? It leaves Lessons and its path. You can restore it from this page.`)) return;
+    if (!window.confirm(`Retire "${node.title}"? It leaves Lessons and its path. Restore it from Retired.`)) return;
     void changeLesson(node.id, { active: false });
   }
 
@@ -120,21 +111,6 @@ export function LessonList({
         </div>
       </div>
       {notice ? <p className="px-4 py-2 text-sm text-red-300">{notice}</p> : null}
-      {staff && retired.length > 0 ? (
-        <ul className="flex max-h-36 flex-col gap-2 overflow-auto border-b border-[#27272A] px-4 py-2 text-xs text-zinc-400">
-          {retired.map((node) => (
-            <li key={node.id} className="flex flex-wrap items-center gap-2">
-              <span>
-                {node.number > 0 ? formatLessonNumber(node.number) : "Retired"} {node.title}
-              </span>
-              <span>{lessonTypeLabel(node.category)}</span>
-              <button className="btn" type="button" disabled={busy === node.id} onClick={() => void changeLesson(node.id, { active: true })}>
-                Restore
-              </button>
-            </li>
-          ))}
-        </ul>
-      ) : null}
       <div className="min-h-0 flex-1 overflow-auto">
         <div className="mx-auto flex w-full max-w-3xl flex-col gap-3 px-4 py-4">
           <p className="text-xs text-zinc-500">Every active lesson is here. A lesson stays locked until every lesson it requires is mastered.</p>

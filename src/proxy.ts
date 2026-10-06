@@ -1,6 +1,6 @@
 import { NextResponse, type NextRequest } from "next/server";
 
-const protectedPath = /^\/(lessons|learn|graph|dashboard|account|outage|challenge|propose|review)(\/|$)/;
+const protectedPath = /^\/(lessons|learn|graph|dashboard|account|outage|challenge|propose|review|retired)(\/|$)/;
 
 export default function proxy(request: NextRequest) {
   const hasSession = Boolean(request.cookies.get("sg_session")?.value);
@@ -32,6 +32,8 @@ export const config = {
     "/propose/:path*",
     "/review",
     "/review/:path*",
+    "/retired",
+    "/retired/:path*",
     "/login",
     "/register",
   ],

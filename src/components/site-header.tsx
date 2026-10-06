@@ -36,6 +36,8 @@ export function SiteHeader({
           ? "Propose"
           : pathname.startsWith("/review")
             ? "Review"
+            : pathname.startsWith("/retired")
+              ? "Retired"
             : pathname.startsWith("/learn")
               ? "Learning"
               : pathname.startsWith("/challenge/")
@@ -63,6 +65,7 @@ export function SiteHeader({
         {link("/outage", "Outage")}
         {link("/propose", "Propose")}
         {staff ? link("/review", "Review") : null}
+        {staff ? link("/retired", "Retired") : null}
       </nav>
       <p className="hidden min-w-0 flex-1 truncate text-sm text-zinc-500 md:block">
         <Link href="/lessons" className="hover:text-zinc-300">
