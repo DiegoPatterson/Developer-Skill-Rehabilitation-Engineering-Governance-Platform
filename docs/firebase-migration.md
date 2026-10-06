@@ -4,19 +4,21 @@ Postgres is the running store. Firestore is a named driver that refuses work unt
 
 ## What stays in git
 
-The challenge catalog stays in `src/content`. Do not copy solutions, hints, anchors, or expected answers into Firestore. Skill node ids in the database are a mirror of the catalog so submissions can reference them. Positions and prerequisite edges can stay in git. User state moves.
+The running catalog is `skill_nodes`, including the grader payload. `src/content` only seeds a lesson that has no payload yet. Do not copy solutions, hints, anchors, or expected answers into a client-readable Firestore document. Active, tree placement, and position are columns on the lesson. User state moves.
 
 ## Method to collection
 
 | ProgressStore method | Firestore |
 | --- | --- |
-| register / login | `users/{uid}` with `username`, `email`, `passwordHash`, `emailVerifiedAt`. Confirmation tokens live in `users/{uid}/verifications/{id}` (`tokenHash`, `expiresAt`, `usedAt`). Or use Firebase Auth and drop the password hash. |
+| register / login | `users/{uid}` with `username`, `email`, `passwordHash`, `emailVerifiedAt`, `status` (`active` or `inactive`), and `role` (`banned`, `user`, `superuser`, `admin`, `owner`). New accounts are active users. Confirmation tokens live in `users/{uid}/verifications/{id}` (`tokenHash`, `expiresAt`, `usedAt`). Or use Firebase Auth and drop the password hash. | |
 | sessions | Prefer Firebase Auth session cookies. If you keep the table: `sessions/{tokenHash}` with `userId`, `expiresAt` |
 | `masteredIds` | `users/{uid}/progress/{nodeId}` where `status == mastered` |
 | `openAttempt` / `resetAttempt` | `users/{uid}/attempts/{attemptId}` with `nodeId`, `mode`, `startedAt`, `deadlineAt`, `hintsUsed`, `closedAt` |
 | `revealHint` | Increment `hintsUsed` on the open attempt in a transaction |
 | `recordSubmission` | Transaction: write `users/{uid}/submissions/{id}`, upsert progress, update `users/{uid}/stats`, update `users/{uid}/streak` |
 | `dashboard` | Query submissions for the user, ordered by `submittedAt` |
+
+Problem proposals live in `problemProposals/{id}`: author, status (`pending`, `approved`, `rejected`), the draft, and `lessonNumber` / `nodeId` after acceptance. The answer key stays on the server. Approved drafts are loaded into the catalog on the server. Do not copy solutions into a client-readable document.
 
 Stats fields match Prisma: `overallElo`, `debuggingElo`, `securityElo`, `comprehensionElo`, `performanceElo`, `architectureElo`, `mlElo`, `totalChallengesSolved`. Streak fields: `currentStreak`, `longestStreak`, `lastActiveDate`, `lastFreezeUsedOn`, `streakFreezesLeft`.
 

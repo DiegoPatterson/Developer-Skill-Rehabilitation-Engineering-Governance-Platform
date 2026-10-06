@@ -70,11 +70,14 @@ export type Challenge = {
   /** Stable catalog number. New lessons take the next integer. Do not renumber. */
   number: number;
   title: string;
+  label?: string;
   category: Category;
   difficulty: number;
   summary: string;
   showInGraph: boolean;
   prereqs: string[];
+  /** True when an admin has saved x and y. Otherwise the tree lays the card out. */
+  placed?: boolean;
   x: number;
   y: number;
   kind: ChallengeKind;
@@ -106,6 +109,7 @@ export type PublicChallenge = {
   id: string;
   number: number;
   title: string;
+  label: string;
   category: Category;
   difficulty: number;
   summary: string;

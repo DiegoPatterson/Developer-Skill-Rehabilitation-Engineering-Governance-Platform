@@ -1,13 +1,10 @@
 import { NextResponse, type NextRequest } from "next/server";
 
-const protectedPath = /^\/(graph|dashboard|account|outage|challenge)(\/|$)/;
+const protectedPath = /^\/(graph|dashboard|account|outage|challenge|propose|review)(\/|$)/;
 
 export default function proxy(request: NextRequest) {
   const hasSession = Boolean(request.cookies.get("sg_session")?.value);
   const { pathname } = request.nextUrl;
-  if ((pathname === "/login" || pathname === "/register") && hasSession) {
-    return NextResponse.redirect(new URL("/graph", request.nextUrl));
-  }
   if (!hasSession && protectedPath.test(pathname)) {
     const url = new URL("/login", request.nextUrl);
     url.searchParams.set("next", pathname);
@@ -27,6 +24,10 @@ export const config = {
     "/outage",
     "/outage/:path*",
     "/challenge/:path*",
+    "/propose",
+    "/propose/:path*",
+    "/review",
+    "/review/:path*",
     "/login",
     "/register",
   ],

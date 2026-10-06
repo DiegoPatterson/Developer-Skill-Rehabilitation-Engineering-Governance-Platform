@@ -5,6 +5,7 @@ import bcrypt from "bcryptjs";
 import { z } from "zod";
 import { sendMail } from "./mail";
 import { verificationMessage } from "./verification-message";
+import { signInBlock, type AccountStatus, type UserRole } from "@/content/roles";
 import { ensureCatalog, getDb } from "./db";
 
 export const SESSION_COOKIE = "sg_session";
@@ -18,6 +19,8 @@ export type Viewer = {
   id: string;
   username: string;
   email: string;
+  status: AccountStatus;
+  role: UserRole;
   createdAt: string;
   overallElo: number;
   debuggingElo: number;
@@ -63,11 +66,13 @@ export async function getViewer(): Promise<Viewer | null> {
     return null;
   }
   const { user } = session;
-  if (!user.emailVerifiedAt) return null;
+  if (!user.emailVerifiedAt || signInBlock(user.status, user.role)) return null;
   return {
     id: user.id,
     username: user.username,
     email: user.email,
+    status: user.status,
+    role: user.role,
     createdAt: user.createdAt.toISOString(),
     overallElo: user.stats?.overallElo ?? 1200,
     debuggingElo: user.stats?.debuggingElo ?? 1200,
@@ -142,7 +147,7 @@ export async function registerAccount(input: {
   try {
     const user = await getDb().$transaction(async (tx) => {
       const created = await tx.user.create({
-        data: { username: username.data, email: email.data, passwordHash },
+        data: { username: username.data, email: email.data, passwordHash, status: "active", role: "user" },
       });
       await tx.userStats.create({ data: { userId: created.id } });
       await tx.userStreak.create({ data: { userId: created.id } });
@@ -209,6 +214,8 @@ export async function loginAccount(input: { username: string; password: string }
   const user = await getDb().user.findUnique({ where: { username: username.data } });
   const match = user ? await bcrypt.compare(password.data, user.passwordHash) : false;
   if (!user || !match) return { ok: false, status: 401, error: "Unknown username or password." };
+  const blocked = signInBlock(user.status, user.role);
+  if (blocked) return { ok: false, status: 403, error: blocked };
   if (!user.emailVerifiedAt) return { ok: false, status: 403, error: "Confirm your email before signing in." };
   return { ok: true, token: await issueSession(user.id) };
 }

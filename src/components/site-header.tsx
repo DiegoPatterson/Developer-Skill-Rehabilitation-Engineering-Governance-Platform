@@ -13,6 +13,7 @@ export function SiteHeader({
   streak,
   shields,
   skills,
+  staff,
 }: {
   username: string;
   overallElo: number;
@@ -20,6 +21,7 @@ export function SiteHeader({
   streak: number;
   shields: number;
   skills: SkillLink[];
+  staff: boolean;
 }) {
   const pathname = usePathname();
   const challengeId = pathname.startsWith("/challenge/") ? pathname.slice("/challenge/".length) : "";
@@ -30,9 +32,13 @@ export function SiteHeader({
       ? "Account"
       : pathname.startsWith("/outage")
         ? `${formatLessonNumber(skills.find((item) => item.id === "incident-ledger")?.number ?? 20)} Outage`
-        : pathname.startsWith("/challenge/")
-          ? (skill ? `${formatLessonNumber(skill.number)} ${skill.title}` : "Challenge")
-          : "Graph";
+        : pathname.startsWith("/propose")
+          ? "Propose"
+          : pathname.startsWith("/review")
+            ? "Review"
+            : pathname.startsWith("/challenge/")
+              ? (skill ? `${formatLessonNumber(skill.number)} ${skill.title}` : "Challenge")
+              : "Graph";
 
   const link = (href: string, label: string) => {
     const active = href === "/graph" ? pathname === "/graph" : pathname.startsWith(href);
@@ -48,10 +54,12 @@ export function SiteHeader({
       <Link href="/graph" className="font-semibold text-zinc-50">
         Skill Governance
       </Link>
-      <nav className="flex gap-4 text-sm">
+      <nav className="flex min-w-0 gap-4 overflow-x-auto text-sm">
         {link("/graph", "Graph")}
         {link("/dashboard", "Dashboard")}
         {link("/outage", "Outage")}
+        {link("/propose", "Propose")}
+        {staff ? link("/review", "Review") : null}
       </nav>
       <p className="hidden min-w-0 flex-1 truncate text-sm text-zinc-500 md:block">
         <Link href="/graph" className="hover:text-zinc-300">

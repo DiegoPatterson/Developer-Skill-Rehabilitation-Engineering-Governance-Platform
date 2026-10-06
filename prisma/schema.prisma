@@ -7,21 +7,50 @@ datasource db {
   provider = "postgresql"
 }
 
-model User {
-  id              String    @id @default(uuid()) @db.Uuid
-  username        String    @unique @db.VarChar(50)
-  email           String    @unique
-  passwordHash    String    @map("password_hash")
-  emailVerifiedAt DateTime? @map("email_verified_at") @db.Timestamptz(6)
-  createdAt       DateTime  @default(now()) @map("created_at") @db.Timestamptz(6)
+enum AccountStatus {
+  active
+  inactive
 
-  stats         UserStats?
-  streak        UserStreak?
-  progress      UserNodeProgress[]
-  submissions   ChallengeSubmission[]
-  sessions      Session[]
-  attempts      ChallengeAttempt[]
-  verifications EmailVerification[]
+  @@map("account_status")
+}
+
+enum UserRole {
+  banned
+  user
+  superuser
+  admin
+  owner
+
+  @@map("user_role")
+}
+
+enum ProposalStatus {
+  pending
+  approved
+  rejected
+
+  @@map("proposal_status")
+}
+
+model User {
+  id              String        @id @default(uuid()) @db.Uuid
+  username        String        @unique @db.VarChar(50)
+  email           String        @unique
+  passwordHash    String        @map("password_hash")
+  emailVerifiedAt DateTime?     @map("email_verified_at") @db.Timestamptz(6)
+  status          AccountStatus @default(active)
+  role            UserRole      @default(user)
+  createdAt       DateTime      @default(now()) @map("created_at") @db.Timestamptz(6)
+
+  stats             UserStats?
+  streak            UserStreak?
+  progress          UserNodeProgress[]
+  submissions       ChallengeSubmission[]
+  sessions          Session[]
+  attempts          ChallengeAttempt[]
+  verifications     EmailVerification[]
+  proposalsAuthored ProblemProposal[] @relation("ProposalAuthor")
+  proposalsReviewed ProblemProposal[] @relation("ProposalReviewer")
 
   @@map("users")
 }
@@ -84,6 +113,13 @@ model SkillNode {
   difficultyLevel     Int      @default(1) @map("difficulty_level")
   summary             String
   showInGraph         Boolean  @default(true) @map("show_in_graph")
+  lessonNumber        Int?     @unique @map("lesson_number")
+  kind                String   @default("patch") @db.VarChar(20)
+  label               String   @default("") @db.VarChar(40)
+  active              Boolean  @default(true)
+  positionX           Float?   @map("position_x")
+  positionY           Float?   @map("position_y")
+  payload             Json?
 
   progress    UserNodeProgress[]
   submissions ChallengeSubmission[]
@@ -141,4 +177,33 @@ model ChallengeAttempt {
 
   @@index([userId, nodeId])
   @@map("challenge_attempts")
+}
+
+model ProblemProposal {
+  id             String         @id @default(uuid()) @db.Uuid
+  authorId       String         @map("author_id") @db.Uuid
+  status         ProposalStatus @default(pending)
+  label          String         @db.VarChar(40)
+  title          String         @db.VarChar(120)
+  description    String         @db.Text
+  category       String         @db.VarChar(50)
+  kind           String         @db.VarChar(20)
+  difficulty     Int
+  showInGraph    Boolean        @default(true) @map("show_in_graph")
+  prereqNumbers  Int[]          @default([]) @map("prereq_numbers")
+  payload        Json
+  reviewNote     String?        @map("review_note") @db.Text
+  reviewerId     String?        @map("reviewer_id") @db.Uuid
+  reviewedAt     DateTime?      @map("reviewed_at") @db.Timestamptz(6)
+  lessonNumber   Int?           @unique @map("lesson_number")
+  nodeId         String?        @unique @map("node_id") @db.VarChar(100)
+  createdAt      DateTime       @default(now()) @map("created_at") @db.Timestamptz(6)
+  updatedAt      DateTime       @updatedAt @map("updated_at") @db.Timestamptz(6)
+
+  author   User  @relation("ProposalAuthor", fields: [authorId], references: [id], onDelete: Cascade)
+  reviewer User? @relation("ProposalReviewer", fields: [reviewerId], references: [id], onDelete: SetNull)
+
+  @@index([authorId, status])
+  @@index([status, createdAt])
+  @@map("problem_proposals")
 }

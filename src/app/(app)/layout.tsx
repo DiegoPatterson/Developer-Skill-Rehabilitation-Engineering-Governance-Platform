@@ -1,5 +1,6 @@
 import { SiteHeader } from "@/components/site-header";
 import { skillLinks } from "@/content/view";
+import { canReview } from "@/content/roles";
 import { createSource } from "@/content/source";
 import { getViewer } from "@/server/auth";
 import { redirect } from "next/navigation";
@@ -17,6 +18,7 @@ export default async function AppLayout({ children }: { children: ReactNode }) {
         streak={viewer.currentStreak}
         shields={viewer.shields}
         skills={skillLinks(createSource().list())}
+        staff={canReview(viewer.role)}
       />
       {children}
     </div>

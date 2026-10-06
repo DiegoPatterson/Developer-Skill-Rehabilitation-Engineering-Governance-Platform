@@ -43,6 +43,7 @@ function Locked({ view }: { view: WorkspaceView }) {
     <section className="mx-auto max-w-xl px-6 py-16">
       <p className="font-mono text-xs uppercase tracking-wide text-zinc-500">
         {formatLessonNumber(view.number)} · {view.category}
+        {view.label ? ` · ${view.label}` : ""}
       </p>
       <h1 className="mt-2 text-2xl font-semibold text-zinc-50">{view.title}</h1>
       <p className="mt-3 text-sm text-zinc-400">This node stays locked until you master:</p>
@@ -231,7 +232,8 @@ function LiveWorkspace({ view, attempt }: { view: WorkspaceView; attempt: Attemp
       </div>
       <section className={paneClass("problem", "workspace__problem bg-[#121215] p-4")}>
         <p className="font-mono text-[10px] uppercase tracking-wide text-zinc-500">
-          {formatLessonNumber(view.number)} · {view.category} · difficulty {view.difficulty}
+          {formatLessonNumber(view.number)} · {view.category}
+          {view.label ? ` · ${view.label}` : ""} · difficulty {view.difficulty}
         </p>
         <h1 className="mt-1 text-lg font-semibold text-zinc-50">{view.title}</h1>
         <p className="mt-2 font-mono text-xs text-[#4ADE80]">{view.signature}</p>

@@ -9,13 +9,15 @@ import {
   lessonVisible,
   type LessonSort,
 } from "@/content/lesson";
-import type { GraphNodeView, GraphStatus } from "@/content/view-model";
+import type { GraphNodeView, GraphStatus, RetiredLesson } from "@/content/view-model";
 import { SKILL_CARD, layoutSkillGraph } from "@/engine/graph-layout";
 import {
   Background,
   Controls,
+  Handle,
   Position,
   ReactFlow,
+  applyNodeChanges,
   useReactFlow,
   type Edge,
   type Node,
@@ -33,6 +35,7 @@ type SkillData = {
   difficulty: number;
   status: GraphStatus;
   summary: string;
+  label: string;
   dimmed: boolean;
   requirement: string;
 };
@@ -127,23 +130,30 @@ function SkillCard({ data }: NodeProps<SkillFlowNode>) {
   const locked = data.status === "locked";
   const mastered = data.status === "mastered";
   return (
-    <div
-      className="h-full w-full overflow-hidden rounded-lg border px-3 py-2"
-      style={{
-        background: mastered ? "#052e16" : "#121215",
-        borderColor: data.dimmed ? "#27272A" : locked ? "#3f3f46" : "#10B981",
-        boxShadow: !data.dimmed && data.status === "in_progress" ? "0 0 0 1px #10B981, 0 0 18px rgba(16,185,129,0.35)" : "none",
-        opacity: data.dimmed ? 0.2 : locked ? 0.55 : 1,
-      }}
-    >
-      <div className="flex items-center justify-between gap-2">
-        <div className="font-mono text-[10px] uppercase tracking-wide text-zinc-500">{data.category}</div>
-        <div className="font-mono text-[10px] text-zinc-300">{formatLessonNumber(data.number)}</div>
+    <div className="relative h-full w-full">
+      <Handle type="target" position={Position.Left} isConnectable={false} style={{ background: "#3f3f46", border: "none", width: 8, height: 8, pointerEvents: "none" }} />
+      <Handle type="source" position={Position.Right} isConnectable={false} style={{ background: "#10B981", border: "none", width: 8, height: 8, pointerEvents: "none" }} />
+      <div
+        className="h-full w-full overflow-hidden rounded-lg border px-3 py-2"
+        style={{
+          background: mastered ? "#052e16" : "#121215",
+          borderColor: data.dimmed ? "#27272A" : locked ? "#3f3f46" : "#10B981",
+          boxShadow: !data.dimmed && data.status === "in_progress" ? "0 0 0 1px #10B981, 0 0 18px rgba(16,185,129,0.35)" : "none",
+          opacity: data.dimmed ? 0.2 : locked ? 0.55 : 1,
+        }}
+      >
+        <div className="flex items-center justify-between gap-2">
+          <div className="truncate font-mono text-[10px] uppercase tracking-wide text-zinc-500">
+            {data.category}
+            {data.label ? ` · ${data.label}` : ""}
+          </div>
+          <div className="font-mono text-[10px] text-zinc-300">{formatLessonNumber(data.number)}</div>
+        </div>
+        <div className="mt-1 line-clamp-2 text-sm font-medium leading-5 text-zinc-100">{data.title}</div>
+        <div className="mt-1 text-xs text-zinc-500">Difficulty {data.difficulty}</div>
+        <div className="mt-2 text-xs text-[#4ADE80]">{mastered ? "Mastered" : locked ? "Locked" : "Open"}</div>
+        {data.requirement ? <div className="mt-1 truncate text-[10px] text-zinc-400">{data.requirement}</div> : null}
       </div>
-      <div className="mt-1 line-clamp-2 text-sm font-medium leading-5 text-zinc-100">{data.title}</div>
-      <div className="mt-1 text-xs text-zinc-500">Difficulty {data.difficulty}</div>
-      <div className="mt-2 text-xs text-[#4ADE80]">{mastered ? "Mastered" : locked ? "Locked" : "Open"}</div>
-      {data.requirement ? <div className="mt-1 truncate text-[10px] text-zinc-400">{data.requirement}</div> : null}
     </div>
   );
 }
@@ -300,7 +310,87 @@ function LessonBar({
   );
 }
 
-export function SkillGraph({ nodes }: { nodes: GraphNodeView[] }) {
+async function patchCatalog(id: string, body: Record<string, unknown>): Promise<void> {
+  const response = await fetch(`/api/catalog/${id}`, {
+    method: "PATCH",
+    headers: { "content-type": "application/json" },
+    body: JSON.stringify(body),
+  });
+  const data = (await response.json().catch(() => null)) as { error?: string } | null;
+  if (!response.ok) throw new Error(data?.error ?? "Could not update the lesson.");
+}
+
+function CatalogShelf({
+  mode,
+  offTree,
+  retired,
+  busy,
+  notice,
+  onAdd,
+  onRetire,
+  onRestore,
+}: {
+  mode: GraphMode;
+  offTree: GraphNodeView[];
+  retired: RetiredLesson[];
+  busy: string;
+  notice: string;
+  onAdd: (id: string, category: string) => void;
+  onRetire: (node: { id: string; title: string }) => void;
+  onRestore: (id: string) => void;
+}) {
+  const showOff = mode === "tree" && offTree.length > 0;
+  if (mode !== "tree" && retired.length === 0 && !notice) return null;
+  return (
+    <div className="max-h-44 overflow-auto border-b border-zinc-800 px-4 py-2 text-xs text-zinc-400">
+      {mode === "tree" ? <p>Drag a card to save where it sits. Lessons that are not on a tree stay in the list.</p> : null}
+      {notice ? <p className="mt-1 text-sm text-red-300">{notice}</p> : null}
+      {showOff ? (
+        <ul className="mt-2 flex flex-col gap-2">
+          {offTree.map((node) => (
+            <li key={node.id} className="flex flex-wrap items-center gap-2">
+              <span className="text-zinc-200">
+                {formatLessonNumber(node.number)} {node.title}
+              </span>
+              <span className="text-zinc-500">{lessonTypeLabel(node.category)} · not on the tree</span>
+              <button className="btn" type="button" disabled={busy === node.id} onClick={() => onAdd(node.id, node.category)}>
+                Add to tree
+              </button>
+              <button className="btn" type="button" disabled={busy === node.id} onClick={() => onRetire(node)}>
+                Retire
+              </button>
+            </li>
+          ))}
+        </ul>
+      ) : null}
+      {retired.length > 0 ? (
+        <ul className="mt-2 flex flex-col gap-2">
+          {retired.map((node) => (
+            <li key={node.id} className="flex flex-wrap items-center gap-2">
+              <span className="text-zinc-500">
+                {node.number > 0 ? formatLessonNumber(node.number) : "Retired"} {node.title}
+              </span>
+              <span>Retired</span>
+              <button className="btn" type="button" disabled={busy === node.id} onClick={() => onRestore(node.id)}>
+                Restore
+              </button>
+            </li>
+          ))}
+        </ul>
+      ) : null}
+    </div>
+  );
+}
+
+export function SkillGraph({
+  nodes,
+  staff = false,
+  retired = [],
+}: {
+  nodes: GraphNodeView[];
+  staff?: boolean;
+  retired?: RetiredLesson[];
+}) {
   const router = useRouter();
   const narrow = useNarrow();
   const [mode, setMode] = useGraphMode(narrow);
@@ -309,12 +399,17 @@ export function SkillGraph({ nodes }: { nodes: GraphNodeView[] }) {
   const [category, setCategory] = useState("");
   const [difficulty, setDifficulty] = useState("");
   const [sort, setSort] = useState<LessonSort>("number");
+  const [notice, setNotice] = useState("");
+  const [busy, setBusy] = useState("");
+  const [savedPos, setSavedPos] = useState<Record<string, { x: number; y: number }>>({});
   const treeNodes = useMemo(() => nodes.filter((node) => node.inGraph), [nodes]);
   const onTrack = useMemo(() => treeNodes.filter((node) => node.category === track), [treeNodes, track]);
   const placed = useMemo(
     () =>
       layoutSkillGraph(
-        onTrack.map((node) => ({ id: node.id, prereqs: node.prereqs, category: node.category, number: node.number })),
+        onTrack
+          .filter((node) => !node.placed)
+          .map((node) => ({ id: node.id, prereqs: node.prereqs, category: node.category, number: node.number })),
       ),
     [onTrack],
   );
@@ -333,12 +428,12 @@ export function SkillGraph({ nodes }: { nodes: GraphNodeView[] }) {
     return ids;
   }, [nodes, query, category, difficulty]);
   const byId = useMemo(() => new Map(nodes.map((node) => [node.id, node])), [nodes]);
-  const flowNodes = useMemo<SkillFlowNode[]>(
+  const derivedNodes = useMemo<SkillFlowNode[]>(
     () =>
       onTrack.map((node) => ({
         id: node.id,
         type: "skill",
-        position: placed.positions.get(node.id) ?? { x: 0, y: 0 },
+        position: savedPos[node.id] ?? (node.placed ? { x: node.x, y: node.y } : (placed.positions.get(node.id) ?? { x: 0, y: 0 })),
         width: SKILL_CARD.width,
         height: SKILL_CARD.height,
         style: { width: SKILL_CARD.width, height: SKILL_CARD.height },
@@ -349,14 +444,48 @@ export function SkillGraph({ nodes }: { nodes: GraphNodeView[] }) {
           difficulty: node.difficulty,
           status: node.status,
           summary: node.summary,
+          label: node.label,
           dimmed: treeNarrowed && !lessonVisible(node, treeFilter),
           requirement: requirementLabel(node, byId),
         },
         sourcePosition: Position.Right,
         targetPosition: Position.Left,
       })),
-    [onTrack, placed, treeNarrowed, treeFilter, byId],
+    [onTrack, placed, treeNarrowed, treeFilter, byId, savedPos],
   );
+  const flowSignature = derivedNodes
+    .map((node) => [node.id, node.position.x, node.position.y, node.data.status, node.data.dimmed, node.data.requirement, node.data.title].join(":"))
+    .join("|");
+  const [flowNodes, setFlowNodes] = useState(derivedNodes);
+  const [seenFlow, setSeenFlow] = useState(flowSignature);
+  if (flowSignature !== seenFlow) {
+    setSeenFlow(flowSignature);
+    setFlowNodes(derivedNodes);
+  }
+  const offTree = useMemo(() => nodes.filter((node) => !node.inGraph).sort((a, b) => a.number - b.number), [nodes]);
+  async function changeLesson(id: string, body: Record<string, unknown>, trackTo?: string) {
+    setBusy(id);
+    setNotice("");
+    setSavedPos((current) => {
+      if (!(id in current)) return current;
+      const next = { ...current };
+      delete next[id];
+      return next;
+    });
+    try {
+      await patchCatalog(id, body);
+      if (trackTo) setTrack(trackTo);
+      router.refresh();
+    } catch (error) {
+      setNotice(error instanceof Error ? error.message : "Could not update the lesson.");
+    } finally {
+      setBusy("");
+    }
+  }
+  function retire(node: { id: string; title: string }) {
+    if (!window.confirm(`Retire "${node.title}"? It leaves the list and the tree. You can restore it from this page.`)) return;
+    void changeLesson(node.id, { active: false });
+  }
   const edges = useMemo<Edge[]>(
     () =>
       onTrack.flatMap((node) =>
@@ -422,6 +551,20 @@ export function SkillGraph({ nodes }: { nodes: GraphNodeView[] }) {
         onTrack={setTrack}
         countLabel={countLabel}
       />
+      {staff ? (
+        <CatalogShelf
+          mode={mode}
+          offTree={offTree}
+          retired={retired}
+          busy={busy}
+          notice={notice}
+          onAdd={(id, category) => void changeLesson(id, { showInGraph: true }, category)}
+          onRetire={retire}
+          onRestore={(id) => void changeLesson(id, { active: true })}
+        />
+      ) : notice ? (
+        <p className="px-4 py-2 text-sm text-red-300">{notice}</p>
+      ) : null}
       {mode === "list" ? (
         <div className="min-h-0 flex-1 overflow-auto">
           <div className="mx-auto flex w-full max-w-3xl flex-col gap-3 px-4 py-4">
@@ -432,11 +575,8 @@ export function SkillGraph({ nodes }: { nodes: GraphNodeView[] }) {
               const mastered = node.status === "mastered";
               const requirement = requirementLabel(node, byId);
               return (
-                <button
+                <div
                   key={node.id}
-                  type="button"
-                  disabled={locked}
-                  onClick={() => openNode(router, node.href, node.status)}
                   className="w-full rounded-lg border px-3 py-3 text-left"
                   style={{
                     background: mastered ? "#052e16" : "#121215",
@@ -444,15 +584,37 @@ export function SkillGraph({ nodes }: { nodes: GraphNodeView[] }) {
                     opacity: locked ? 0.55 : 1,
                   }}
                 >
-                  <div className="flex items-center justify-between gap-3">
-                    <div className="font-mono text-[10px] uppercase tracking-wide text-zinc-500">{node.category}</div>
-                    <div className="font-mono text-xs text-zinc-300">{formatLessonNumber(node.number)}</div>
-                  </div>
-                  <div className="mt-1 text-sm font-medium text-zinc-100">{node.title}</div>
-                  <div className="mt-1 text-xs text-zinc-500">Difficulty {node.difficulty}</div>
-                  <div className="mt-2 text-xs text-[#4ADE80]">{mastered ? "Mastered" : locked ? "Locked" : "Open"}</div>
-                  {requirement ? <div className="mt-1 text-xs text-zinc-400">{requirement}</div> : null}
-                </button>
+                  <button type="button" disabled={locked} onClick={() => openNode(router, node.href, node.status)} className="w-full text-left">
+                    <div className="flex items-center justify-between gap-3">
+                      <div className="font-mono text-[10px] uppercase tracking-wide text-zinc-500">
+                        {node.category}
+                        {node.label ? ` · ${node.label}` : ""}
+                      </div>
+                      <div className="font-mono text-xs text-zinc-300">{formatLessonNumber(node.number)}</div>
+                    </div>
+                    <div className="mt-1 text-sm font-medium text-zinc-100">{node.title}</div>
+                    <div className="mt-1 text-xs text-zinc-500">Difficulty {node.difficulty}</div>
+                    <div className="mt-2 text-xs text-[#4ADE80]">{mastered ? "Mastered" : locked ? "Locked" : "Open"}</div>
+                    {requirement ? <div className="mt-1 text-xs text-zinc-400">{requirement}</div> : null}
+                    {node.inGraph ? null : <div className="mt-1 text-[10px] text-zinc-500">Not on the tree</div>}
+                  </button>
+                  {staff ? (
+                    <div className="mt-2 flex flex-wrap gap-2">
+                      {node.inGraph ? (
+                        <button className="btn" type="button" disabled={busy === node.id} onClick={() => void changeLesson(node.id, { showInGraph: false })}>
+                          Take off tree
+                        </button>
+                      ) : (
+                        <button className="btn" type="button" disabled={busy === node.id} onClick={() => void changeLesson(node.id, { showInGraph: true }, node.category)}>
+                          Add to tree
+                        </button>
+                      )}
+                      <button className="btn" type="button" disabled={busy === node.id} onClick={() => retire(node)}>
+                        Retire
+                      </button>
+                    </div>
+                  ) : null}
+                </div>
               );
             })}
           </div>
@@ -469,9 +631,23 @@ export function SkillGraph({ nodes }: { nodes: GraphNodeView[] }) {
             fitView
             fitViewOptions={{ padding: 0.18 }}
             minZoom={0.15}
-            nodesDraggable={false}
+            nodesDraggable={staff}
             nodesConnectable={false}
             proOptions={{ hideAttribution: true }}
+            onNodesChange={(changes) => setFlowNodes((current) => applyNodeChanges(changes, current))}
+            onNodeDragStop={(_, node) => {
+              if (!staff) return;
+              const position = { x: node.position.x, y: node.position.y };
+              setSavedPos((current) => ({ ...current, [node.id]: position }));
+              void patchCatalog(node.id, { positionX: position.x, positionY: position.y }).catch((error: unknown) => {
+                setSavedPos((current) => {
+                  const next = { ...current };
+                  delete next[node.id];
+                  return next;
+                });
+                setNotice(error instanceof Error ? error.message : "Could not save the position.");
+              });
+            }}
             onNodeClick={(_, node) => openNode(router, byId.get(node.id)?.href ?? `/challenge/${node.id}`, (node.data as SkillData).status)}
           >
             <Background color="#27272A" gap={20} />

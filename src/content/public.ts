@@ -5,6 +5,7 @@ export function toPublic(challenge: Challenge): PublicChallenge {
     id: challenge.id,
     number: challenge.number,
     title: challenge.title,
+    label: challenge.label ?? "",
     category: challenge.category,
     difficulty: challenge.difficulty,
     summary: challenge.summary,

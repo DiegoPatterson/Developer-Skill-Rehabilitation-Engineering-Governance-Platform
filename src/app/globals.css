@@ -61,6 +61,10 @@ select.field {
   width: auto;
 }
 
+select.field-block {
+  width: 100%;
+}
+
 .workspace {
   display: grid;
   grid-template-columns: minmax(240px, 320px) minmax(0, 1fr) minmax(240px, 360px);

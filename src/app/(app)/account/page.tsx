@@ -1,4 +1,5 @@
 import { LogoutButton } from "@/components/auth-form";
+import { roleLabel, statusLabel } from "@/content/roles";
 import { formatElo } from "@/engine/elo";
 import { getViewer } from "@/server/auth";
 import { redirect } from "next/navigation";
@@ -11,6 +12,8 @@ export default async function AccountPage() {
   const rows = [
     ["Username", viewer.username],
     ["Email", viewer.email],
+    ["Status", statusLabel(viewer.status)],
+    ["User type", roleLabel(viewer.role)],
     ["Joined", new Date(viewer.createdAt).toLocaleDateString()],
     ["Overall ELO", formatElo(viewer.overallElo, viewer.rated)],
     ["Streak", String(viewer.currentStreak)],

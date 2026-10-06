@@ -24,10 +24,10 @@ Patch and incident code goes through `LocalPermissionSandbox` unless `SANDBOX_DR
 
 Opponent rating is `1000 + difficulty * 160`. K is 24 before the node is mastered and 0 after. An incident updates debugging and security. Overall is the mean of the six category ratings. The streak uses the server's local calendar day. Dates are stored as UTC midnight of that day and read back with UTC getters.
 
-The graph reads positions and prerequisites from the catalog. Status is mastered, locked, or in progress. Locked means a prerequisite is not mastered. The incident node has `showInGraph: false` and is always open.
+The running catalog is the `skill_nodes` table. A lesson with no saved position is laid out from its prerequisites. An admin placement is stored on the row. Status is mastered, locked, or in progress. Locked means a prerequisite is not mastered. Inactive lessons are hidden. The incident starts off the tree and stays open.
 
 ## Later providers
 
 SpaceXAI is the provider for a future generator. The key is `XAI_API_KEY`. The base URL is `https://api.x.ai/v1`. Keep the key on the server. This build does not call the API and does not substitute a fake completion. `ChallengeSource` is the place a generator would plug in. The curated list stays the default until a generator is tested against the same grader.
 
-`DATA_DRIVER=firestore` constructs `FirestoreStore`, which throws. `SANDBOX_DRIVER=e2b` constructs `E2BSandbox`, which throws. The catalog still lives in git either way.
+`DATA_DRIVER=firestore` constructs `FirestoreStore`, which throws. `SANDBOX_DRIVER=e2b` constructs `E2BSandbox`, which throws. `src/content` seeds lessons that are not in the database yet. The running catalog is `skill_nodes`.

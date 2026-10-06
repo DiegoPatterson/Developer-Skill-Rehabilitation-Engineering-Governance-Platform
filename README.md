@@ -16,11 +16,13 @@ Confirmation mail is sent from `strayapps.co@gmail.com`. In `.env`, set `SMTP_US
 
 `npm test` runs the engine, catalog, sandbox, and scoring-rule tests.
 
-The dev server seeds skill nodes from `src/content` the first time it talks to the database. User accounts, sessions, progress, and submissions stay in Postgres.
+The dev server copies a lesson from `src/content` into Postgres the first time that lesson has no saved payload. After that, the list and the tree read active rows from `skill_nodes`. Retiring a lesson hides it and leaves the row in place. User accounts, sessions, progress, and submissions stay in Postgres.
 
 ## What you practice
 
-Six categories: debugging, security, comprehension, performance, architecture, and model selection. The tree view shows one category at a time. Each track starts on its own. A lesson unlocks only after every lesson that feeds it is mastered, including a lesson fed by two tracks. The outage is a 15-minute incident. It is not drawn on a tree. Refreshing the page does not reset its deadline. "Start a new incident" closes the open attempt and starts another clock.
+Six categories: debugging, security, comprehension, performance, architecture, and model selection. The tree view shows one category at a time. Each track starts on its own. A lesson unlocks only after every lesson that feeds it is mastered, including a lesson fed by two tracks. The outage is a 15-minute incident. It is not drawn on a tree.
+
+Anyone signed in can propose a problem from Propose. It asks for a label, a name, a description, a track, a question type, starter code or the answer key that type needs, and optional prerequisites. An admin or owner accepts or rejects it from Review. Accepting assigns the next lesson number. New accounts are active users. An inactive or banned account cannot sign in. Refreshing the page does not reset its deadline. "Start a new incident" closes the open attempt and starts another clock.
 
 ## Scoring
 
@@ -40,10 +42,10 @@ Patch and incident code runs in `sandbox/child.js` under `node --permission`, wi
 
 ## Data
 
-The catalog in `src/content` is the source of truth for challenges. Postgres stores users and progress. `DATA_DRIVER=firestore` selects a store whose methods throw and point at `docs/firebase-migration.md`.
+Active lessons live in Postgres `skill_nodes`, including the grader payload. `src/content` only seeds a lesson that is not stored yet. `DATA_DRIVER=firestore` selects a store whose methods throw and point at `docs/firebase-migration.md`.
 
 Generated challenges are not wired. The later provider is SpaceXAI: set `XAI_API_KEY` on the server and call `https://api.x.ai/v1`. Do not put that key in the browser.
 
 ## Add a challenge
 
-Add an object to `src/content/patch.ts`, `src/content/patch-rest.ts`, or `src/content/studio.ts`. Give it a unique id, prerequisites that already exist, and a graph position. Run `npm test`. The catalog test rejects a duplicate id, a missing prerequisite, a cycle, a reference patch that fails, and a starter that already passes. Solutions, anchors, hint text, and expected answers stay off the public page. `toPublic` is the allowlist.
+Add a seed object to `src/content/patch.ts`, `src/content/patch-rest.ts`, or `src/content/studio.ts` only for a lesson that is not already stored. Give it a unique id, prerequisites that already exist, and the next lesson number. Run `npm test`. The catalog test rejects a duplicate id, a missing prerequisite, a cycle, a reference patch that fails, and a starter that already passes. A lesson that already has a payload is left as the database has it, including whether it is on a tree and where it sits. Player-facing lessons are proposed and accepted, which writes the next row. Solutions, anchors, hint text, and expected answers stay off the public page. `toPublic` is the allowlist.

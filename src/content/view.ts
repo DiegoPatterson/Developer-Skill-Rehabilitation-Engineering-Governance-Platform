@@ -14,11 +14,13 @@ export function graphNodeViews(list: Challenge[], mastered: ReadonlySet<string>)
     id: challenge.id,
     number: challenge.number,
     title: challenge.title,
+    label: challenge.label ?? "",
     category: challenge.category,
     summary: challenge.summary,
     difficulty: challenge.difficulty,
-    x: challenge.x,
-    y: challenge.y,
+    x: challenge.placed === true ? challenge.x : 0,
+    y: challenge.placed === true ? challenge.y : 0,
+    placed: challenge.placed === true,
     prereqs: challenge.prereqs,
     status: mastered.has(challenge.id)
       ? "mastered"

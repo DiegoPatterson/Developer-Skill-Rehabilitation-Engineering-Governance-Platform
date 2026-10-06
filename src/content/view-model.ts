@@ -7,15 +7,24 @@ export type GraphNodeView = {
   id: string;
   number: number;
   title: string;
+  label: string;
   category: string;
   summary: string;
   difficulty: number;
   x: number;
   y: number;
+  placed: boolean;
   prereqs: string[];
   status: GraphStatus;
   inGraph: boolean;
   href: string;
+};
+
+export type RetiredLesson = {
+  id: string;
+  number: number;
+  title: string;
+  category: string;
 };
 
 export type CfgView = {

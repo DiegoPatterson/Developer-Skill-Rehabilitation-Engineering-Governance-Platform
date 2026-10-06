@@ -1,5 +1,5 @@
 import "server-only";
-import { challenges, getChallenge } from "./catalog";
+import { findChallenge, listChallenges } from "./published";
 import type { Challenge } from "./types";
 
 export interface ChallengeSource {
@@ -9,11 +9,11 @@ export interface ChallengeSource {
 
 class CatalogSource implements ChallengeSource {
   list(): Challenge[] {
-    return challenges;
+    return listChallenges();
   }
 
   get(id: string): Challenge | undefined {
-    return getChallenge(id);
+    return findChallenge(id);
   }
 }
 
