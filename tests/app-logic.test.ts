@@ -29,10 +29,10 @@ describe("outcome", () => {
     });
   });
 
-  it("keeps the incident open and locks a node with an unmet prerequisite", () => {
+  it("does not lock a lesson behind a prerequisite", () => {
     expect(isLocked("incident", ["sec-llm"], new Set())).toBe(false);
-    expect(isLocked("patch", ["dbg-state-basics"], new Set())).toBe(true);
-    expect(isLocked("patch", ["dbg-state-basics"], new Set(["dbg-state-basics"]))).toBe(false);
+    expect(isLocked("patch", ["dbg-state-basics"], new Set())).toBe(false);
+    expect(isLocked("patch", [], new Set())).toBe(false);
   });
 });
 

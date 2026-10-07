@@ -1,7 +1,6 @@
 import { createSource } from "@/content/source";
 import { getViewer } from "@/server/auth";
 import { json, logSafe, readJson } from "@/server/http";
-import { isLocked } from "@/server/outcome";
 import { createStore } from "@/server/store";
 import { z } from "zod";
 
@@ -15,10 +14,7 @@ export async function POST(request: Request) {
   const challenge = createSource().get(parsed.data.nodeId);
   if (!challenge) return json({ error: "Unknown challenge." }, 404);
   try {
-    const store = createStore();
-    const mastered = await store.masteredIds(viewer.id);
-    if (isLocked(challenge.kind, challenge.prereqs, mastered)) return json({ error: "This node is locked." }, 403);
-    const revealed = await store.revealHint(viewer.id, challenge.id);
+    const revealed = await createStore().revealHint(viewer.id, challenge.id);
     return json(revealed);
   } catch (error) {
     logSafe(error);

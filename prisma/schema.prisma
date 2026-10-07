@@ -51,6 +51,9 @@ model User {
   verifications     EmailVerification[]
   proposalsAuthored ProblemProposal[] @relation("ProposalAuthor")
   proposalsReviewed ProblemProposal[] @relation("ProposalReviewer")
+  pathProposalsAuthored LearningPathProposal[] @relation("PathAuthor")
+  pathProposalsReviewed LearningPathProposal[] @relation("PathReviewer")
+  pathFavorites         LearningPathFavorite[]
 
   @@map("users")
 }
@@ -206,4 +209,36 @@ model ProblemProposal {
   @@index([authorId, status])
   @@index([status, createdAt])
   @@map("problem_proposals")
+}
+
+model LearningPathProposal {
+  id            String         @id @default(uuid()) @db.Uuid
+  authorId      String         @map("author_id") @db.Uuid
+  status        ProposalStatus @default(pending)
+  topic         String         @db.VarChar(40)
+  description   String         @db.Text
+  lessonNumbers Int[]          @map("lesson_numbers")
+  reviewNote    String?        @map("review_note") @db.Text
+  reviewerId    String?        @map("reviewer_id") @db.Uuid
+  reviewedAt    DateTime?      @map("reviewed_at") @db.Timestamptz(6)
+  createdAt     DateTime       @default(now()) @map("created_at") @db.Timestamptz(6)
+  updatedAt     DateTime       @updatedAt @map("updated_at") @db.Timestamptz(6)
+
+  author   User  @relation("PathAuthor", fields: [authorId], references: [id], onDelete: Cascade)
+  reviewer User? @relation("PathReviewer", fields: [reviewerId], references: [id], onDelete: SetNull)
+
+  @@index([authorId, status])
+  @@index([status, createdAt])
+  @@map("learning_path_proposals")
+}
+
+model LearningPathFavorite {
+  userId    String   @map("user_id") @db.Uuid
+  pathId    String   @map("path_id") @db.VarChar(40)
+  createdAt DateTime @default(now()) @map("created_at") @db.Timestamptz(6)
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@id([userId, pathId])
+  @@index([userId, createdAt])
+  @@map("learning_path_favorites")
 }

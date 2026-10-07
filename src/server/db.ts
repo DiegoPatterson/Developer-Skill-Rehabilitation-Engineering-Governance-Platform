@@ -8,27 +8,38 @@ import { replaceLiveChallenges } from "@/content/published";
 import type { Challenge } from "@/content/types";
 
 const globalForPrisma = globalThis as unknown as {
-  skillGovernancePrismaV2?: PrismaClient;
-  skillGovernanceSeedV2?: Promise<void>;
+  skillGovernancePrismaV5?: PrismaClient;
+  skillGovernanceSeedV5?: Promise<void>;
 };
 
+function clientIsCurrent(client: PrismaClient): boolean {
+  return (
+    typeof client.learningPathProposal?.findMany === "function" &&
+    typeof client.learningPathFavorite?.findMany === "function"
+  );
+}
+
 export function getDb(): PrismaClient {
-  if (!globalForPrisma.skillGovernancePrismaV2) {
-    const connectionString = process.env.DATABASE_URL;
-    if (!connectionString) throw new Error("DATABASE_URL is not set.");
-    globalForPrisma.skillGovernancePrismaV2 = new PrismaClient({
-      adapter: new PrismaPg({ connectionString }),
-    });
+  const cached = globalForPrisma.skillGovernancePrismaV5;
+  if (cached && clientIsCurrent(cached)) return cached;
+  const connectionString = process.env.DATABASE_URL;
+  if (!connectionString) throw new Error("DATABASE_URL is not set.");
+  const client = new PrismaClient({
+    adapter: new PrismaPg({ connectionString }),
+  });
+  if (!clientIsCurrent(client)) {
+    throw new Error("The database client is stale. Restart npm run dev.");
   }
-  return globalForPrisma.skillGovernancePrismaV2;
+  globalForPrisma.skillGovernancePrismaV5 = client;
+  return client;
 }
 
 export function ensureCatalog(): Promise<void> {
-  globalForPrisma.skillGovernanceSeedV2 ??= seedCatalog().catch((error: unknown) => {
-    globalForPrisma.skillGovernanceSeedV2 = undefined;
+  globalForPrisma.skillGovernanceSeedV5 ??= seedCatalog().catch((error: unknown) => {
+    globalForPrisma.skillGovernanceSeedV5 = undefined;
     throw error;
   });
-  return globalForPrisma.skillGovernanceSeedV2.then(() => refreshLiveCatalog());
+  return globalForPrisma.skillGovernanceSeedV5.then(() => refreshLiveCatalog());
 }
 
 function storedPayload(challenge: Challenge): Prisma.InputJsonValue {

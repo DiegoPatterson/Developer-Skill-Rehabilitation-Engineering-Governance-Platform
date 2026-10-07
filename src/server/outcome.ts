@@ -5,9 +5,12 @@ export function ratedCategories(kind: ChallengeKind, category: Category): Catego
   return [category];
 }
 
+/** Learning paths are optional. A lesson never stays closed because a prerequisite is open. */
 export function isLocked(kind: ChallengeKind, prereqs: string[], mastered: ReadonlySet<string>): boolean {
-  if (kind === "incident") return false;
-  return prereqs.some((id) => !mastered.has(id));
+  void kind;
+  void prereqs;
+  void mastered;
+  return false;
 }
 
 export function decideOutcome(input: {

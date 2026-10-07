@@ -38,7 +38,7 @@ async function postJson<T>(url: string, body: unknown): Promise<T> {
   return data as T;
 }
 
-function Locked({ view }: { view: WorkspaceView }) {
+function Unavailable({ view }: { view: WorkspaceView }) {
   return (
     <section className="mx-auto max-w-xl px-6 py-16">
       <p className="font-mono text-xs uppercase tracking-wide text-zinc-500">
@@ -46,16 +46,7 @@ function Locked({ view }: { view: WorkspaceView }) {
         {view.label ? ` · ${view.label}` : ""}
       </p>
       <h1 className="mt-2 text-2xl font-semibold text-zinc-50">{view.title}</h1>
-      <p className="mt-3 text-sm text-zinc-400">This node stays locked until you master:</p>
-      <ul className="mt-3 space-y-2">
-        {view.missing.map((item) => (
-          <li key={item.id}>
-            <Link href={`/challenge/${item.id}`} className="text-[#4ADE80]">
-              {formatLessonNumber(item.number)} {item.title}
-            </Link>
-          </li>
-        ))}
-      </ul>
+      <p className="mt-3 text-sm text-zinc-400">This lesson could not be opened.</p>
     </section>
   );
 }
@@ -77,7 +68,7 @@ function Timer({ deadline }: { deadline: string | null }) {
 }
 
 export function Workspace({ view, attempt }: { view: WorkspaceView; attempt: AttemptView | null }) {
-  if (view.locked || !attempt) return <Locked view={view} />;
+  if (!attempt) return <Unavailable view={view} />;
   return <LiveWorkspace view={view} attempt={attempt} />;
 }
 
@@ -229,6 +220,9 @@ function LiveWorkspace({ view, attempt }: { view: WorkspaceView; attempt: Attemp
             {name[0].toUpperCase() + name.slice(1)}
           </button>
         ))}
+        <Link href={`/challenge/${view.id}/submissions`} className="btn">
+          Submissions
+        </Link>
       </div>
       <section className={paneClass("problem", "workspace__problem bg-[#121215] p-4")}>
         <p className="font-mono text-[10px] uppercase tracking-wide text-zinc-500">
@@ -236,6 +230,9 @@ function LiveWorkspace({ view, attempt }: { view: WorkspaceView; attempt: Attemp
           {view.label ? ` · ${view.label}` : ""} · difficulty {view.difficulty}
         </p>
         <h1 className="mt-1 text-lg font-semibold text-zinc-50">{view.title}</h1>
+        <Link href={`/challenge/${view.id}/submissions`} className="mt-2 inline-block text-sm text-[#4ADE80]">
+          Submissions
+        </Link>
         <p className="mt-2 font-mono text-xs text-[#4ADE80]">{view.signature}</p>
         <div className="mt-4">
           <Blocks blocks={view.brief} />

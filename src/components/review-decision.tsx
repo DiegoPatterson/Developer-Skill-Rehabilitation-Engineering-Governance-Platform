@@ -3,7 +3,15 @@
 import { useRouter } from "next/navigation";
 import { useState } from "react";
 
-export function ReviewDecision({ id }: { id: string }) {
+export function ReviewDecision({
+  id,
+  endpoint = `/api/proposals/${id}/decide`,
+  hint = "Accepting assigns the next lesson number. A rejection needs a note.",
+}: {
+  id: string;
+  endpoint?: string;
+  hint?: string;
+}) {
   const router = useRouter();
   const [note, setNote] = useState("");
   const [error, setError] = useState("");
@@ -13,7 +21,7 @@ export function ReviewDecision({ id }: { id: string }) {
     setPending(action);
     setError("");
     try {
-      const response = await fetch(`/api/proposals/${id}/decide`, {
+      const response = await fetch(endpoint, {
         method: "POST",
         headers: { "content-type": "application/json" },
         body: JSON.stringify({ action, note }),
@@ -38,7 +46,7 @@ export function ReviewDecision({ id }: { id: string }) {
         Note
         <textarea className="field min-h-24" value={note} maxLength={1000} onChange={(event) => setNote(event.target.value)} />
       </label>
-      <p className="text-xs text-zinc-500">Accepting assigns the next lesson number. A rejection needs a note.</p>
+      <p className="text-xs text-zinc-500">{hint}</p>
       {error ? <p className="text-sm text-red-300">{error}</p> : null}
       <div className="flex flex-wrap gap-2">
         <button className="btn btn-primary" type="button" disabled={pending !== null} onClick={() => send("approve")}>

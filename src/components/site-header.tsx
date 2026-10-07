@@ -1,6 +1,7 @@
 "use client";
 
 import { formatLessonNumber } from "@/content/lesson";
+import { LESSON_PATHS } from "@/content/paths";
 import type { SkillLink } from "@/content/view-model";
 import { formatElo } from "@/engine/elo";
 import Link from "next/link";
@@ -24,28 +25,57 @@ export function SiteHeader({
   staff: boolean;
 }) {
   const pathname = usePathname();
-  const challengeId = pathname.startsWith("/challenge/") ? pathname.slice("/challenge/".length) : "";
+  const challengeParts = pathname.startsWith("/challenge/") ? pathname.slice("/challenge/".length).split("/").filter(Boolean) : [];
+  const challengeId = challengeParts[0] ?? "";
   const skill = skills.find((item) => item.id === challengeId);
+  const challengeLabel = skill ? `${formatLessonNumber(skill.number)} ${skill.title}` : "Challenge";
+  const learnId = pathname.startsWith("/learn/") ? (pathname.slice("/learn/".length).split("/").filter(Boolean)[0] ?? "") : "";
+  const learnTopic = LESSON_PATHS.find((path) => path.id === learnId)?.title;
+  const inAdmin =
+    pathname.startsWith("/admin") ||
+    pathname.startsWith("/review") ||
+    pathname.startsWith("/retired") ||
+    pathname.startsWith("/propose/path");
+  const adminLeaf = pathname.startsWith("/propose/path")
+    ? "Propose a path"
+    : pathname.startsWith("/review/path")
+      ? "Review path"
+      : pathname.startsWith("/review")
+        ? "Review"
+        : pathname.startsWith("/retired")
+          ? "Retired"
+          : "";
   const section = pathname.startsWith("/dashboard")
     ? "Dashboard"
     : pathname.startsWith("/account")
       ? "Account"
       : pathname.startsWith("/outage")
         ? `${formatLessonNumber(skills.find((item) => item.id === "incident-ledger")?.number ?? 20)} Outage`
-        : pathname.startsWith("/propose")
-          ? "Propose"
-          : pathname.startsWith("/review")
-            ? "Review"
-            : pathname.startsWith("/retired")
-              ? "Retired"
-            : pathname.startsWith("/learn")
-              ? "Learning"
+        : inAdmin
+          ? adminLeaf
+            ? `Admin panel / ${adminLeaf}`
+            : "Admin panel"
+          : pathname.startsWith("/propose")
+            ? "Propose"
+            : pathname.startsWith("/learn/")
+              ? learnTopic
+                ? `Learning / ${learnTopic}`
+                : "Learning / Path"
+              : pathname.startsWith("/learn")
+                ? "Learning"
               : pathname.startsWith("/challenge/")
-                ? (skill ? `${formatLessonNumber(skill.number)} ${skill.title}` : "Challenge")
+                ? challengeParts[1] === "submissions"
+                  ? `${challengeLabel} / Submissions`
+                  : challengeLabel
                 : "Lessons";
 
   const link = (href: string, label: string) => {
-    const active = pathname === href || pathname.startsWith(`${href}/`);
+    const active =
+      href === "/admin"
+        ? inAdmin
+        : href === "/propose"
+          ? pathname === "/propose"
+          : pathname === href || pathname.startsWith(`${href}/`);
     return (
       <Link href={href} className={active ? "text-[#4ADE80]" : "text-zinc-400 hover:text-zinc-200"}>
         {label}
@@ -64,8 +94,7 @@ export function SiteHeader({
         {link("/dashboard", "Dashboard")}
         {link("/outage", "Outage")}
         {link("/propose", "Propose")}
-        {staff ? link("/review", "Review") : null}
-        {staff ? link("/retired", "Retired") : null}
+        {staff ? link("/admin", "Admin panel") : null}
       </nav>
       <p className="hidden min-w-0 flex-1 truncate text-sm text-zinc-500 md:block">
         <Link href="/lessons" className="hover:text-zinc-300">

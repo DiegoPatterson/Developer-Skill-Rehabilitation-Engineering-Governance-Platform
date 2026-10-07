@@ -3,7 +3,6 @@ import type { GradePayload, GradeResponse } from "@/content/payload";
 import { createSource } from "@/content/source";
 import { getViewer } from "@/server/auth";
 import { json, logSafe, readJson } from "@/server/http";
-import { isLocked } from "@/server/outcome";
 import { createStore } from "@/server/store";
 import type { SpecInput } from "@/engine/spec";
 import { z } from "zod";
@@ -80,10 +79,6 @@ export async function POST(request: Request) {
   if (!challenge) return json({ error: "Unknown challenge." }, 404);
   try {
     const store = createStore();
-    const mastered = await store.masteredIds(viewer.id);
-    if (isLocked(challenge.kind, challenge.prereqs, mastered)) {
-      return json({ error: "This node is locked." }, 403);
-    }
     const payload = payloadOf(parsed.data);
     const reveal = parsed.data.mode === "submit";
     const evaluation = await evaluateChallenge(challenge, payload, reveal);

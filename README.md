@@ -20,9 +20,9 @@ The dev server copies a lesson from `src/content` into Postgres the first time t
 
 ## What you practice
 
-Six categories: debugging, security, comprehension, performance, architecture, and model selection. Lessons is the full catalog and the page you land on. Learning is a separate set of fixed paths, lessons 1–19, and does not grow when a new lesson is accepted. A lesson unlocks only after every lesson it requires is mastered, including a lesson fed by two paths. The outage is a 15-minute incident. It is in Lessons and on no path.
+Six categories: debugging, security, comprehension, performance, architecture, and model selection. Lessons is the full catalog and the page you land on. Learning lists collapsible paths. The built-in paths cover lessons 1–19. An accepted path proposal is added beside them, and a new lesson is not placed on a path until a path lists it. Learning paths are optional. Any lesson opens without mastering another one. The outage is a 15-minute incident. It is in Lessons and on no path.
 
-Anyone signed in can propose a problem from Propose. It asks for a label, a name, a description, a track, a question type, starter code or the answer key that type needs, and optional prerequisites. An admin or owner accepts or rejects it from Review. Accepting assigns the next lesson number. New accounts are active users. An inactive or banned account cannot sign in. Refreshing the page does not reset its deadline. "Start a new incident" closes the open attempt and starts another clock.
+Anyone signed in can propose a problem from Propose. It asks for a label, a name, a description, a track, a question type, starter code or the answer key that type needs, and optional prerequisites. An admin or owner accepts or rejects it from the admin panel. Accepting assigns the next lesson number. An admin or owner proposes a learning path from the admin panel: a topic, a description, and lessons in order. Accepting publishes it on Learning. Difficulty is the range of those lessons. New accounts are active users. An inactive or banned account cannot sign in. Refreshing the page does not reset its deadline. "Start a new incident" closes the open attempt and starts another clock.
 
 ## Scoring
 

@@ -24,7 +24,7 @@ Patch and incident code goes through `LocalPermissionSandbox` unless `SANDBOX_DR
 
 Opponent rating is `1000 + difficulty * 160`. K is 24 before the node is mastered and 0 after. An incident updates debugging and security. Overall is the mean of the six category ratings. The streak uses the server's local calendar day. Dates are stored as UTC midnight of that day and read back with UTC getters.
 
-The running catalog is the `skill_nodes` table. Lessons lists every active row. Learning shows fixed paths for lessons 1–19 and does not place accepted lessons on a path. Status is mastered, locked, or in progress. Locked means a prerequisite is not mastered. Inactive lessons are hidden. The incident stays open and is not on a path.
+The running catalog is the `skill_nodes` table. Lessons lists every active row. Learning lists the built-in paths plus accepted rows in `learning_path_proposals`. A path is a topic, a description, and an ordered list of lesson numbers. Its difficulty is the range of those lessons. An admin or owner proposes a path from the admin panel, and an admin or owner accepts it before it appears. Status on the list is mastered or not yet mastered. Prerequisites do not lock a lesson. Inactive lessons are hidden. The incident stays open and is not on a built-in path.
 
 ## Later providers
 

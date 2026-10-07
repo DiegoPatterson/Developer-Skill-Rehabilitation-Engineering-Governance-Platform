@@ -12,7 +12,7 @@ function filesOf(id: string, which: "starter" | "solution"): Record<string, stri
 }
 
 run("http", () => {
-  it("registers, locks a later node, fails the starter, and masters the reference", async () => {
+  it("registers, opens a later node, fails the starter, and masters the reference", async () => {
     const username = `sg${Date.now().toString(36)}`;
     const password = "practice-pass-10";
     const registered = await fetch(`${base}/api/auth/register`, {
@@ -50,18 +50,19 @@ run("http", () => {
     const cookie = logged.headers.getSetCookie().map((item) => item.split(";")[0]).join("; ");
     expect(cookie).toContain("sg_session=");
 
-    const lockedPage = await fetch(`${base}/challenge/dbg-async-races`, { headers: { cookie } });
-    expect(lockedPage.status).toBe(200);
-    const lockedHtml = await lockedPage.text();
-    expect(lockedHtml).toContain("stays locked");
-    expect(lockedHtml).not.toContain("REFERENCE_SOLUTION");
+    const laterPage = await fetch(`${base}/challenge/dbg-async-races`, { headers: { cookie } });
+    expect(laterPage.status).toBe(200);
+    const laterHtml = await laterPage.text();
+    expect(laterHtml).toContain("Lost-update reserves");
+    expect(laterHtml).not.toContain("stays locked");
+    expect(laterHtml).not.toContain("REFERENCE_SOLUTION");
 
-    const lockedGrade = await fetch(`${base}/api/grade`, {
+    const laterGrade = await fetch(`${base}/api/grade`, {
       method: "POST",
       headers: { "content-type": "application/json", cookie },
       body: JSON.stringify({ nodeId: "dbg-async-races", mode: "run", files: filesOf("dbg-async-races", "solution") }),
     });
-    expect(lockedGrade.status).toBe(403);
+    expect(laterGrade.status).toBe(200);
 
     const openPage = await fetch(`${base}/challenge/dbg-state-basics`, { headers: { cookie } });
     expect(openPage.status).toBe(200);
